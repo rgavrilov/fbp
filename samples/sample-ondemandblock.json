@@ -1,0 +1,411 @@
+﻿{
+    "blueprint": {
+        "icons": [
+            {
+                "signal": {
+                    "type": "item",
+                    "name": "assembling-machine-3"
+                },
+                "index": 1
+            }
+        ],
+        "entities": [
+            {
+                "entity_number": 1,
+                "name": "ee-infinity-chest",
+                "position": {
+                    "x": -322.5,
+                    "y": -94.5
+                },
+                "infinity_settings": {
+                    "remove_unfiltered_items": false,
+                    "filters": [
+                        {
+                            "name": "copper-plate",
+                            "count": 100,
+                            "mode": "at-least",
+                            "index": 1
+                        },
+                        {
+                            "name": "iron-plate",
+                            "count": 100,
+                            "mode": "at-least",
+                            "index": 2
+                        },
+                        {
+                            "name": "steel-plate",
+                            "count": 100,
+                            "mode": "at-least",
+                            "index": 3
+                        },
+                        {
+                            "name": "coal",
+                            "count": 50,
+                            "mode": "at-least",
+                            "index": 4
+                        },
+                        {
+                            "name": "stone",
+                            "count": 50,
+                            "mode": "at-least",
+                            "index": 5
+                        }
+                    ]
+                }
+            },
+            {
+                "entity_number": 2,
+                "name": "fast-inserter",
+                "position": {
+                    "x": -321.5,
+                    "y": -94.5
+                },
+                "direction": 6
+            },
+            {
+                "entity_number": 3,
+                "name": "assembling-machine-3",
+                "position": {
+                    "x": -319.5,
+                    "y": -94.5
+                },
+                "recipe": "copper-cable"
+            },
+            {
+                "entity_number": 4,
+                "name": "fast-inserter",
+                "position": {
+                    "x": -317.5,
+                    "y": -94.5
+                },
+                "direction": 6,
+                "control_behavior": {
+                    "circuit_condition": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-everything"
+                        },
+                        "constant": 10,
+                        "comparator": "<"
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 5
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 5,
+                "name": "wooden-chest",
+                "position": {
+                    "x": -316.5,
+                    "y": -94.5
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 4
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 6,
+                "name": "fast-inserter",
+                "position": {
+                    "x": -317.5,
+                    "y": -95.5
+                },
+                "direction": 2
+            },
+            {
+                "entity_number": 7,
+                "name": "wooden-chest",
+                "position": {
+                    "x": -316.5,
+                    "y": -95.5
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 14,
+                                "circuit_id": 1
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 8,
+                "name": "fast-inserter",
+                "position": {
+                    "x": -315.5,
+                    "y": -94.5
+                },
+                "direction": 6,
+                "control_behavior": {
+                    "circuit_condition": {
+                        "first_signal": {
+                            "type": "item",
+                            "name": "copper-cable"
+                        },
+                        "constant": 0,
+                        "comparator": ">"
+                    },
+                    "circuit_read_hand_contents": true,
+                    "circuit_set_stack_size": true,
+                    "stack_control_input_signal": {
+                        "type": "item",
+                        "name": "copper-cable"
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 11
+                            }
+                        ],
+                        "green": [
+                            {
+                                "entity_id": 10
+                            },
+                            {
+                                "entity_id": 15,
+                                "circuit_id": 2
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 9,
+                "name": "filter-inserter",
+                "position": {
+                    "x": -315.5,
+                    "y": -95.5
+                },
+                "direction": 2,
+                "control_behavior": {
+                    "circuit_mode_of_operation": 1,
+                    "circuit_read_hand_contents": true
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 15,
+                                "circuit_id": 1
+                            }
+                        ],
+                        "green": [
+                            {
+                                "entity_id": 14,
+                                "circuit_id": 2
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 10,
+                "name": "medium-electric-pole",
+                "position": {
+                    "x": -320.5,
+                    "y": -92.5
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 13,
+                                "circuit_id": 2
+                            }
+                        ],
+                        "green": [
+                            {
+                                "entity_id": 8
+                            }
+                        ]
+                    }
+                },
+                "neighbours": [
+                    11
+                ]
+            },
+            {
+                "entity_number": 11,
+                "name": "medium-electric-pole",
+                "position": {
+                    "x": -318.5,
+                    "y": -92.5
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 8
+                            }
+                        ]
+                    }
+                },
+                "neighbours": [
+                    10
+                ]
+            },
+            {
+                "entity_number": 12,
+                "name": "constant-combinator",
+                "position": {
+                    "x": -319.5,
+                    "y": -92.5
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 14,
+                                "circuit_id": 1
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 13,
+                "name": "decider-combinator",
+                "position": {
+                    "x": -316.5,
+                    "y": -93
+                },
+                "control_behavior": {
+                    "decider_conditions": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-each"
+                        },
+                        "constant": 0,
+                        "comparator": ">",
+                        "output_signal": {
+                            "type": "virtual",
+                            "name": "signal-each"
+                        },
+                        "copy_count_from_input": true
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 14,
+                                "circuit_id": 2
+                            }
+                        ]
+                    },
+                    "2": {
+                        "red": [
+                            {
+                                "entity_id": 10
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 14,
+                "name": "arithmetic-combinator",
+                "position": {
+                    "x": -317.5,
+                    "y": -93
+                },
+                "control_behavior": {
+                    "arithmetic_conditions": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-each"
+                        },
+                        "second_constant": -1,
+                        "operation": "*",
+                        "output_signal": {
+                            "type": "virtual",
+                            "name": "signal-each"
+                        }
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 12
+                            },
+                            {
+                                "entity_id": 7
+                            }
+                        ]
+                    },
+                    "2": {
+                        "red": [
+                            {
+                                "entity_id": 13,
+                                "circuit_id": 1
+                            }
+                        ],
+                        "green": [
+                            {
+                                "entity_id": 9
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 15,
+                "name": "arithmetic-combinator",
+                "position": {
+                    "x": -315.5,
+                    "y": -93
+                },
+                "control_behavior": {
+                    "arithmetic_conditions": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-each"
+                        },
+                        "second_constant": -1,
+                        "operation": "*",
+                        "output_signal": {
+                            "type": "virtual",
+                            "name": "signal-each"
+                        }
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 9
+                            }
+                        ]
+                    },
+                    "2": {
+                        "green": [
+                            {
+                                "entity_id": 8
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "item": "blueprint",
+        "version": 281479276199938
+    }
+}

@@ -1,0 +1,72 @@
+﻿{
+    "blueprint": {
+        "icons": [
+            {
+                "signal": {
+                    "type": "item",
+                    "name": "transport-belt"
+                },
+                "index": 1
+            }
+        ],
+        "entities": [
+            {
+                "entity_number": 1,
+                "name": "transport-belt",
+                "position": {
+                    "x": -270.5,
+                    "y": -82.5
+                },
+                "control_behavior": {
+                    "circuit_condition": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-A"
+                        },
+                        "second_signal": {
+                            "type": "virtual",
+                            "name": "signal-X"
+                        },
+                        "comparator": "<"
+                    },
+                    "circuit_enable_disable": true,
+                    "circuit_read_hand_contents": true,
+                    "circuit_contents_read_mode": 0
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 2
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "entity_number": 2,
+                "name": "transport-belt",
+                "position": {
+                    "x": -269.5,
+                    "y": -82.5
+                },
+                "control_behavior": {
+                    "circuit_enable_disable": false,
+                    "circuit_read_hand_contents": true,
+                    "circuit_contents_read_mode": 1
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 1
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "item": "blueprint",
+        "version": 281479276134400
+    }
+}

@@ -1,0 +1,89 @@
+﻿{
+    "blueprint": {
+        "icons": [
+            {
+                "signal": {
+                    "type": "item",
+                    "name": "arithmetic-combinator"
+                },
+                "index": 1
+            }
+        ],
+        "entities": [
+            {
+                "entity_number": 1,
+                "name": "arithmetic-combinator",
+                "position": {
+                    "x": -238.5,
+                    "y": -95
+                },
+                "direction": 4,
+                "control_behavior": {
+                    "arithmetic_conditions": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-A"
+                        },
+                        "second_signal": {
+                            "type": "virtual",
+                            "name": "signal-B"
+                        },
+                        "operation": "*",
+                        "output_signal": {
+                            "type": "virtual",
+                            "name": "signal-C"
+                        }
+                    }
+                }
+            },
+            {
+                "entity_number": 2,
+                "name": "arithmetic-combinator",
+                "position": {
+                    "x": -236.5,
+                    "y": -95
+                },
+                "direction": 4,
+                "control_behavior": {
+                    "arithmetic_conditions": {
+                        "first_constant": 9000,
+                        "second_constant": 800,
+                        "operation": "<<",
+                        "output_signal": {
+                            "type": "virtual",
+                            "name": "signal-G"
+                        }
+                    }
+                }
+            },
+            {
+                "entity_number": 3,
+                "name": "arithmetic-combinator",
+                "position": {
+                    "x": -237.5,
+                    "y": -95
+                },
+                "direction": 4,
+                "control_behavior": {
+                    "arithmetic_conditions": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-D"
+                        },
+                        "second_signal": {
+                            "type": "virtual",
+                            "name": "signal-E"
+                        },
+                        "operation": "AND",
+                        "output_signal": {
+                            "type": "virtual",
+                            "name": "signal-F"
+                        }
+                    }
+                }
+            }
+        ],
+        "item": "blueprint",
+        "version": 281479276134400
+    }
+}

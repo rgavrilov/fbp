@@ -1,0 +1,123 @@
+﻿{
+    "blueprint": {
+        "icons": [
+            {
+                "signal": {
+                    "type": "item",
+                    "name": "filter-inserter"
+                },
+                "index": 1
+            }
+        ],
+        "entities": [
+            {
+                "entity_number": 1,
+                "name": "filter-inserter",
+                "position": {
+                    "x": -262.5,
+                    "y": -83.5
+                },
+                "direction": 4,
+                "control_behavior": {
+                    "circuit_condition": {
+                        "first_signal": {
+                            "type": "virtual",
+                            "name": "signal-B"
+                        },
+                        "constant": 0,
+                        "comparator": "<"
+                    },
+                    "circuit_read_hand_contents": true,
+                    "circuit_hand_read_mode": 1,
+                    "circuit_set_stack_size": true,
+                    "stack_control_input_signal": {
+                        "type": "virtual",
+                        "name": "signal-G"
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 2
+                            },
+                            {
+                                "entity_id": 3
+                            }
+                        ]
+                    }
+                },
+                "filters": [
+                    {
+                        "index": 1,
+                        "name": "fast-transport-belt"
+                    }
+                ],
+                "filter_mode": "blacklist"
+            },
+            {
+                "entity_number": 2,
+                "name": "filter-inserter",
+                "position": {
+                    "x": -263.5,
+                    "y": -83.5
+                },
+                "direction": 4,
+                "control_behavior": {
+                    "circuit_mode_of_operation": 3,
+                    "circuit_read_hand_contents": true,
+                    "circuit_set_stack_size": true,
+                    "stack_control_input_signal": {
+                        "type": "virtual",
+                        "name": "signal-A"
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 1
+                            }
+                        ]
+                    }
+                },
+                "filters": [
+                    {
+                        "index": 1,
+                        "name": "transport-belt"
+                    }
+                ]
+            },
+            {
+                "entity_number": 3,
+                "name": "filter-inserter",
+                "position": {
+                    "x": -261.5,
+                    "y": -83.5
+                },
+                "direction": 4,
+                "control_behavior": {
+                    "circuit_mode_of_operation": 1,
+                    "circuit_read_hand_contents": true,
+                    "circuit_hand_read_mode": 1,
+                    "circuit_set_stack_size": true,
+                    "stack_control_input_signal": {
+                        "type": "virtual",
+                        "name": "signal-H"
+                    }
+                },
+                "connections": {
+                    "1": {
+                        "red": [
+                            {
+                                "entity_id": 1
+                            }
+                        ]
+                    }
+                }
+            }
+        ],
+        "item": "blueprint",
+        "version": 281479276134400
+    }
+}
