@@ -3,12 +3,12 @@ import _ from 'lodash';
 import { SignalValue, toOutputSignal } from './circuit';
 
 export class ConstantCombinator extends Entity {
+    signals!: SignalValue[];
+
     constructor(init?: Partial<ConstantCombinator> & { signals: SignalValue[] }) {
         super('constant-combinator', 1, 1);
         Object.assign(this, init);
     }
-
-    signals!: SignalValue[];
 
     getBlueprintOutputAttributes() {
         return {

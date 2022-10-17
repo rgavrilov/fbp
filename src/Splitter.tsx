@@ -4,13 +4,13 @@ import { Item } from './Items';
 type SplitterConfiguration = Pick<Splitter, 'inputPriority' | 'outputPriority' | 'filter'>;
 
 class SplitterBase extends Entity {
-    constructor(name: 'splitter' | 'fast-splitter' | 'express-splitter', configuration?: SplitterConfiguration) {
-        super(name, 2, 1);
-    }
-
     inputPriority?: 'left' | 'right';
     outputPriority?: 'left' | 'right';
     filter?: Item;
+
+    constructor(name: 'splitter' | 'fast-splitter' | 'express-splitter', configuration?: SplitterConfiguration) {
+        super(name, 2, 1);
+    }
 
     getBlueprintOutputAttributes(): {} {
         return {

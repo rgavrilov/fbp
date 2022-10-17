@@ -1,7 +1,5 @@
 import './App.css';
 import { buildBlueprintExport, getBlueprintExchangeString } from './blueprintExport';
-import { Direction } from './Direction';
-import { Entity } from './Entity';
 import { onDemandFactory } from './OnDemandFactory';
 
 // const bpDiagram = `

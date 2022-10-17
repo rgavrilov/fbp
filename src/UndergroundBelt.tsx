@@ -4,6 +4,8 @@ import _ from 'lodash';
 type UndergroundBeltConfiguration = Pick<UndergroundBelt, 'beltDirection'>;
 
 class UndergroundBeltBase extends Entity {
+    beltDirection!: 'input' | 'output';
+
     constructor(
         name: 'underground-belt' | 'fast-underground-belt' | 'express-underground-belt',
         configuration: UndergroundBeltConfiguration,
@@ -11,8 +13,6 @@ class UndergroundBeltBase extends Entity {
         super(name, 1, 1);
         _.assign(this, configuration);
     }
-
-    beltDirection!: 'input' | 'output';
 
     getBlueprintOutputAttributes(): {} {
         return {

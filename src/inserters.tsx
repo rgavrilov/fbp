@@ -71,15 +71,15 @@ export class StackInserter extends InserterBase {
 type FilterInserterOptions = Pick<FilterInserterBase, 'filters' | 'filterMode' | 'enabledCondition' | 'setFilterFromCircuit' | 'stackSizeSignal' | 'readHandContent'>;
 
 class FilterInserterBase extends InserterBase {
+    filters?: Item[];
+    filterMode?: 'whitelist' | 'blacklist';
+    setFilterFromCircuit?: boolean;
+
     constructor(name: Item, init?: InserterOptions & FilterInserterOptions) {
         super(name, init);
         _.assign(this, init);
         this.filters = init?.filters;
     }
-
-    filters?: Item[];
-    filterMode?: 'whitelist' | 'blacklist';
-    setFilterFromCircuit?: boolean;
 
     getMode(): number {
         const enableMode = !!this.enabledCondition;

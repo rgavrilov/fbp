@@ -2,6 +2,6 @@
 
 export class GuiSignalDisplay extends Entity {
     constructor() {
-        super('gui-signal-display', 1, 1);
+        super('constant-combinator', 1, 1);
     }
 }

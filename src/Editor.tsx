@@ -4,30 +4,45 @@ import { Entity } from './Entity';
 import { Direction } from './Direction';
 import { directionMotions } from './DirectionMotions';
 import * as _ from 'lodash';
+import { Plan } from './PlanBuilder';
 
 export class Editor {
     constructor(public fbp: Fbp, public cursor: Position = Position.O) {
     }
 
     add(entity: Entity, direction: Direction = Direction.Up) {
-        const existingEntity = this.findEntityAt(this.cursor);
+        this.addAtPosition(entity, direction, this.cursor);
+        return new Editor(this.fbp, this.cursor);
+    }
+
+    addAtPosition(entity: Entity, direction: Direction, position: Position, elementName?: string) {
+        const existingEntity = this.findEntityAt(position);
         if (!!existingEntity) {
             throw new Error(`Collision at ${ this.cursor.toString() }. Trying to add: ${ entity.name }.`);
         }
-        this.fbp.addEntity(this.cursor, entity, direction);
-        return new Editor(this.fbp, this.cursor);
+        this.fbp.addEntity(position, entity, direction);
     }
 
     move(dir: Direction, distance: number = 1) {
         this.cursor = directionMotions[dir](this.cursor, distance);
     }
 
-    private findEntityAt(position: Position) {
-        return _.find(this.fbp.elements, (e) => position.inBox(e.position, e.entity.dimensions));
+    public findEntityAt(position: Position): (Entity | undefined) {
+        return _.find(this.fbp.elements, (e) => position.inBox(e.position, e.entity.dimensions))?.entity;
     }
 
-    moveTo(x: number, y: number) {
-        this.cursor = new Position(x, y);
+    moveToWithPlan(id: string, plan: Plan) {
+        this.moveTo(plan.elements.get(id)!.position);
+    }
+
+    moveTo(x: Position): this;
+    moveTo(x: number, y: number): this;
+    moveTo(x: number | Position, y?: number): this {
+        if (typeof x === 'number') {
+            this.cursor = new Position(x, y!);
+        } else {
+            this.cursor = new Position(x.x, x.y);
+        }
         return this;
     }
 
@@ -60,7 +75,6 @@ export class Editor {
         });
 
         this.fbp.connections.push(...childBP.connections);
-        this.fbp.electricConnections.push(...childBP.electricConnections);
     }
 
     addLine(entityBuilder: () => Entity, direction: Direction, count: number) {

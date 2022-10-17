@@ -28,6 +28,8 @@
     },
     "jest": {
         "testEnvironment": "node",
-        "testMatch": ["**/tests/**/*.ts"]
+        "testMatch": [
+            "**/tests/**/*.ts"
+        ]
     }
 }

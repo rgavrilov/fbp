@@ -5,7 +5,6 @@ import { IdentityCombinator, Inverter } from './ArithmeticCombinator';
 import { GuiSignalDisplay } from './GuiSignalDisplay';
 import { Direction } from './Direction';
 import { Network } from './circuit';
-import { ConnectionPoint } from './ConnectionPoint';
 import { TransportBelt } from './transportBelts';
 
 export function buildControlBlock() {
@@ -28,6 +27,7 @@ export function buildControlBlock() {
     // return belt
     editor.r(3).d().add(new TransportBelt(), Direction.Down);
     editor.r().add(new TransportBelt(), Direction.Left);
+    editor.r().add(new TransportBelt(), Direction.Left);
 
     editor.fbp.addConnection(Network.Red, demandPole, controlPole);
     editor.fbp.addConnection(Network.Green, demandPole, accum.input);
@@ -37,9 +37,8 @@ export function buildControlBlock() {
     editor.fbp.addConnection(Network.Red, inverter.output, controlPole);
     editor.fbp.addConnection(Network.Red, inverter.output, controlDisplay);
 
-    editor.fbp.addPublicConnectionPoint('demand', new ConnectionPoint(demandPole));
-    editor.fbp.addPublicConnectionPoint('control', new ConnectionPoint(controlPole));
-    editor.fbp.addPublicPole('demand', demandPole);
+    editor.fbp.addExport('demand', demandPole);
+    editor.fbp.addExport('control', controlPole);
 
     return fbp;
 }

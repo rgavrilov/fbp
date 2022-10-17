@@ -8,6 +8,8 @@ export class ArithmeticCombinator extends Entity {
     operation!: '*' | '+' | '-' | '<<' | '>>' | '/' | '%' | '^' | 'AND' | 'OR' | 'XOR';
     secondOperand!: Signal | number;
     outputSignal!: Signal;
+    input: ConnectionPoint;
+    output: ConnectionPoint;
 
     constructor(init: Partial<ArithmeticCombinator> & Pick<ArithmeticCombinator, 'firstOperand' | 'secondOperand' | 'operation' | 'outputSignal'>) {
         super('arithmetic-combinator', 1, 2);
@@ -15,9 +17,6 @@ export class ArithmeticCombinator extends Entity {
         this.input = new ConnectionPoint(this, '1');
         this.output = new ConnectionPoint(this, '2');
     }
-
-    input: ConnectionPoint;
-    output: ConnectionPoint;
 
     getBlueprintOutputAttributes() {
         return {

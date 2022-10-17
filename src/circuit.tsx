@@ -4,7 +4,7 @@ import _ from 'lodash';
 export type Circuit = '1' | '2';
 
 export enum Network {
-    Red, Green
+    Red, Green, Electric
 }
 
 export type SignalType = 'item' | 'virtual' | 'fluid';
