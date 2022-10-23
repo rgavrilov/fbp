@@ -61,20 +61,33 @@ export function planToBlueprint(planString: string, //
     ][], exports: Record<string, string>,
 ): Fbp {
 
-    function getConnection(elements: StackMap<string, { entity: Entity }>,
+    function buildConnection(elements: StackMap<string, { entity: Entity }>,
         connection: string | { id: string; circuit: 'input' | 'output' },
     ): ConnectionPoint | Entity {
-        const elementId = typeof connection === 'string' ? connection as string : connection.id;
-        const entity = elements.get(elementId).entity;
-        let point: ConnectionPoint | undefined = undefined;
-        if (typeof connection === 'object' && 'circuit' in connection) {
-            if (connection.circuit in entity) {
-                point = (entity as any)[connection.circuit];
-                if (point === undefined) {
-                    throw new Error(`Circuit ${ connection.circuit } is not defined on entity: ${ JSON.stringify(entity) }.`);
+
+        function buildCanonicalConnection(connection: string | { id: string; circuit: 'input' | 'output' }): { id: string; circuit: 'input' | 'output' } {
+            if (typeof connection === 'object') {
+                return connection;
+            } else {
+                const parts = connection.split(':');
+                if (parts[1] && ['input', 'output'].indexOf(parts[1]) === -1) {
+                    throw new Error(`Circuit is specified but is not a valid circuit. Circuit given: '${ parts[1] }'.`);
                 }
+                return { id: parts[0], circuit: parts[1] as ('input' | 'output') };
             }
         }
+
+        const canonicalConnection: { id: string; circuit: 'input' | 'output' } = buildCanonicalConnection(connection);
+        const entity = elements.get(canonicalConnection.id).entity;
+        let point: ConnectionPoint | undefined = undefined;
+        if (canonicalConnection.circuit) {
+            point = (entity as any)[canonicalConnection.circuit];
+            if (point === undefined) {
+                throw new Error(`Circuit ${ canonicalConnection.circuit } is not defined on entity: ${ JSON.stringify(
+                    entity) }.`);
+            }
+        }
+
         return point ?? entity;
     }
 
@@ -98,8 +111,8 @@ export function planToBlueprint(planString: string, //
     for (let connection of connections) {
         const network = connection[0];
         fbp.addConnection(network,
-            getConnection(planElements, connection[1]),
-            getConnection(planElements, connection[2]),
+            buildConnection(planElements, connection[1]),
+            buildConnection(planElements, connection[2]),
         );
     }
 

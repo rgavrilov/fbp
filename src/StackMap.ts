@@ -52,6 +52,10 @@ export class StackMap<K, V> implements Iterable<[K, V]> {
         }
     }
 
+    keys(): IterableIterator<K> {
+        return this.map.keys();
+    }
+
     get(key: K): V {
         if (!this.map.has(key)) {
             throw new Error(`No value under key ${ key } is found in the map.`);

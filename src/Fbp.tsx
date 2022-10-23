@@ -14,12 +14,14 @@ export type Connections = {
 
 export type PipeConnection = { fluid: Fluid, entity: UndergroundPipe };
 
+export type Connection = {
+    point1: ConnectionPoint, point2: ConnectionPoint, network: Network
+};
+
 export class Fbp {
     exports: { [name: string]: Entity | ConnectionPoint | PipeConnection } = {};
     elements: Element[] = [];
-    connections: {
-        point1: ConnectionPoint, point2: ConnectionPoint, network: Network
-    }[] = [];
+    connections: Connection[] = [];
 
     constructor(public name: string) {}
 
@@ -28,6 +30,12 @@ export class Fbp {
     }
 
     addConnection(network: Network, point1: ConnectionPoint | Entity, point2: ConnectionPoint | Entity) {
+        if (point1 == undefined) {
+            throw new Error('Point1 of connection is undefined.');
+        }
+        if (point2 == undefined) {
+            throw new Error('Point2 of connection is undefined.');
+        }
         if (point1 instanceof Entity) {
             point1 = new ConnectionPoint(point1 as Entity);
         }

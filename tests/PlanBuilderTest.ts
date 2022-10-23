@@ -2,6 +2,8 @@
 import { Entity } from '../src/Entity';
 import { Network } from '../src/circuit';
 import { loadPlan, planToBlueprint } from '../src/PlanBuilder';
+import { ConnectionPoint } from '../src/ConnectionPoint';
+import { Connection } from '../src/Fbp';
 
 
 const plan = `
@@ -13,6 +15,9 @@ class TestEntity extends Entity {
     constructor(public id: string) {
         super('battery', 1, 1);
     }
+
+    public input: ConnectionPoint = new ConnectionPoint(this, '1');
+    public output: ConnectionPoint = new ConnectionPoint(this, '2');
 }
 
 describe('loadPlan', () => {
@@ -22,8 +27,8 @@ describe('loadPlan', () => {
     });
 });
 
-describe('planToBuleprint', () => {
-    test('loads plan as blueprint', () => {
+describe('planToBlueprint', () => {
+    test('loads a plan as a blueprint', () => {
         const fbp = planToBlueprint(plan, {
             aa: () => new TestEntity('aa'),
             bb: () => new TestEntity('bb'),
@@ -37,5 +42,25 @@ describe('planToBuleprint', () => {
             .toBeTruthy();
         expect(fbp.exports['exp1']).toBeTruthy();
         expect((fbp.exports['exp1'] as TestEntity).id).toBe('bb');
+    });
+    test('supports connection', () => {
+        const fbp = planToBlueprint('aa .bb .', {
+            aa: () => new TestEntity('aa'), bb: () => new TestEntity('bb'),
+        }, [[Network.Red, 'aa', 'bb']], { aa: 'aa', bb: 'bb' });
+        expect(fbp.connections).toContainEqual({
+            network: Network.Red,
+            point1: new ConnectionPoint(fbp.exports['aa'] as Entity),
+            point2: new ConnectionPoint(fbp.exports['bb'] as Entity),
+        } as Connection);
+    });
+    test('supports connection id:circuit shortcut', () => {
+        const fbp = planToBlueprint('aa .bb .', {
+            aa: () => new TestEntity('aa'), bb: () => new TestEntity('bb'),
+        }, [[Network.Red, 'aa:input', 'bb:output']], { aa: 'aa', bb: 'bb' });
+        expect(fbp.connections).toContainEqual({
+            network: Network.Red,
+            point1: new ConnectionPoint(fbp.exports['aa'] as Entity, '1'),
+            point2: new ConnectionPoint(fbp.exports['bb'] as Entity, '2'),
+        } as Connection);
     });
 });

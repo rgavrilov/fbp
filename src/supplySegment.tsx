@@ -2,15 +2,14 @@
 import { Recipe } from './Recipe';
 import _ from 'lodash';
 import { Fluid, fluids, Item } from './Items';
-import { FastTransportBelt, TransportBelt } from './transportBelts';
-import { Direction } from './Direction';
 import { Splitter } from './Splitter';
+import { Direction } from './Direction';
 import { UndergroundBelt } from './UndergroundBelt';
 import { FastInserter, LongHandedInserter } from './inserters';
 import { UndergroundPipe } from './UndergroundPipe';
 
 export const supplyBeltMap: Partial<Record<Item | Fluid, number>> = {
-    'copper-plate': 1, 'iron-plate': 1, 'steel-plate': 2, 'electronic-circuit': 2, 'coal': 3, 'stone': 3,
+    'copper-plate': 1, 'iron-plate': 1, 'steel-plate': 2, 'coal': 3, 'stone': 3,
 };
 
 function useNextAvailableSpot(availableSpots: Record<string, boolean>): number {
@@ -24,10 +23,6 @@ function useNextAvailableSpot(availableSpots: Record<string, boolean>): number {
 
 export function buildSupplySegment(e: Editor, recipe: Recipe) {
     const ingredients = _.keys(recipe.ingredients) as (Item | Fluid)[];
-
-    e.moveTo(0, 0).addLine(() => new TransportBelt(), Direction.Down, 4);
-    e.moveTo(1, 0).addLine(() => new TransportBelt(), Direction.Down, 4);
-    e.moveTo(2, 0).addLine(() => new FastTransportBelt(), Direction.Down, 4);
 
     // figure out which ingredient inserts to use
     const ingredientBelts = _.chain(ingredients).map(i => supplyBeltMap[i]).filter(v => v !== undefined).uniq().value();
