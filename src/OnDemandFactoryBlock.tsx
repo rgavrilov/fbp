@@ -43,10 +43,11 @@ pf - pick-up filter, decider that isolates ingr pick-up inserter from being cont
  */
 const planString: string = `
 ybD.ybD.rbD.m1#.amL.---.---.iiR.ic .ipR.bsD.tsD.ybU.
-ybD.ybD.rbD.m2#.---.---.---.peL.pc .pdL.btD.---.ybU.
-ybD.ybD.rbD.m3#.---.---.---.iaU.dfU.cc .ybD.tiU.ybU.
-ybD.ybD.rbD.   .bp .pfL.   .-- .-- .dp .ybD.---.ybU.
+ybD.ybD.rbD.m2#.---.---.---.iaR.---.cc .btD.---.ybU.
+ybD.ybD.rbD.m3#.---.---.---.peL.pc .pdL.ybD.tiU.ybU.
+ybD.ybD.rbD.   .bp .pfL.   .dfR.---.dp .ybD.---.ybU.
 `;
+
 
 export function onDemandFactoryBlock(recipe: Recipe): Fbp {
     const fbp = planToBlueprint(planString, {
@@ -74,8 +75,7 @@ export function onDemandFactoryBlock(recipe: Recipe): Fbp {
                 })),
             });
             return ingredientsConstant;
-        },
-        ii: () => new FastInserter(),
+        },   ii: () => new FastInserter(),
         ic: () => new WoodenChest(),
         pc: () => new WoodenChest(),
         ip: () => new FilterInserter({

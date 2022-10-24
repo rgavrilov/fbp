@@ -9,7 +9,7 @@ import { FastInserter, LongHandedInserter } from './inserters';
 import { UndergroundPipe } from './UndergroundPipe';
 
 export const supplyBeltMap: Partial<Record<Item | Fluid, number>> = {
-    'copper-plate': 1, 'iron-plate': 1, 'steel-plate': 2, 'coal': 3, 'stone': 3,
+    'copper-plate': 1, 'iron-plate': 1, 'steel-plate': 2, 'electronic-circuit': 2, 'coal': 3, 'stone': 3,
 };
 
 function useNextAvailableSpot(availableSpots: Record<string, boolean>): number {
@@ -93,5 +93,13 @@ export function buildSupplySegment(e: Editor, recipe: Recipe) {
     if (_.includes(ingredientBelts, 1)) {
         const spot = useNextAvailableSpot(availableSpots);
         e.moveTo(3, spot - 1).add(new FastInserter(), Direction.Left);
+    }
+
+    // if product goes back on the supply belt (as is the case for electronic-circuit) hen add put extractors
+    const productBelt = supplyBeltMap[recipe.item];
+    if (productBelt) {
+        const inserter = productBelt === 1 ? new FastInserter() : new LongHandedInserter();
+        const spot = useNextAvailableSpot(availableSpots);
+        e.moveTo(3, spot - 1).add(inserter, Direction.Right);
     }
 }
