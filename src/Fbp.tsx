@@ -5,6 +5,8 @@ import { ConnectionPoint } from './ConnectionPoint';
 import { Circuit, Network } from './circuit';
 import { Fluid } from './Items';
 import { UndergroundPipe } from './UndergroundPipe';
+import { Dimensions } from './Dimensions';
+import _ from 'lodash';
 
 export type Element = { position: Position, entity: Entity, direction: Direction };
 
@@ -52,5 +54,40 @@ export class Fbp {
 
     addExport(name: string, point: Entity | ConnectionPoint | PipeConnection) {
         this.exports[name] = point;
+    }
+
+    rotate(cwQuarterTurns: number) {
+        if (cwQuarterTurns === 1) {
+            const dimensions = this.getDimensions();
+            for (let element of this.elements) {
+                element.direction = element.direction === Direction.Left ? Direction.Up : element.direction + 1;
+                element.position = new Position(-element.position.y + dimensions.height - 1 -
+                    (element.direction === Direction.Up || element.direction === Direction.Down ? element.entity.dimensions.width : element.entity.dimensions.height) + 1,
+                    element.position.x);
+            }
+        }
+        else {
+            for (let iter = 0; iter < cwQuarterTurns; ++iter) {
+                this.rotate(1);
+            }
+        }
+    }
+
+    getDimensions(): Dimensions {
+        const minX = _.chain(this.elements).map(e => e.position.x).min().value()!;
+        const maxX = _.chain(this.elements)
+            .map(e => e.position.x + ((e.direction === Direction.Left || e.direction === Direction.Right)
+                ? e.entity.dimensions.height
+                : e.entity.dimensions.width))
+            .max()
+            .value();
+        const minY = _.chain(this.elements).map(e => e.position.y).min().value()!;
+        const maxY = _.chain(this.elements)
+            .map(e => e.position.y + ((e.direction === Direction.Left || e.direction === Direction.Right)
+                ? e.entity.dimensions.width
+                : e.entity.dimensions.height))
+            .max()
+            .value()!;
+        return new Dimensions(maxX - minX, maxY - minY);
     }
 }

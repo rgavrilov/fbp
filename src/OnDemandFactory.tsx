@@ -28,12 +28,16 @@ export function onDemandFactory() {
     ];
 
     const testFactory2: FactorioRecipe[] = [
-        'copper-cable',
-        'plastic-bar',
-        ...repeat('advanced-circuit', 3),
+        'copper-cable', 'plastic-bar', ...repeat('advanced-circuit', 4),
     ];
 
     const sciencePacksFactory: FactorioRecipe[] = [
+        ...repeat('plastic-bar', 3),
+        'electric-engine-unit',
+        'sulfur',
+        'battery',
+        ...repeat('processing-unit', 2),
+
         'copper-cable',
         'copper-cable',
         'electronic-circuit',
@@ -43,12 +47,9 @@ export function onDemandFactory() {
         'electronic-circuit',
 
         'copper-cable',
-        'plastic-bar',
         ...repeat('advanced-circuit', 4),
         'copper-cable',
-        'plastic-bar',
         ...repeat('advanced-circuit', 4),
-        ...repeat('processing-unit', 2),
         'iron-gear-wheel',
         ...repeat('automation-science-pack', 1),
         'inserter',
@@ -56,10 +57,7 @@ export function onDemandFactory() {
         ...repeat('logistic-science-pack', 2),
         'pipe',
         ...repeat('engine-unit', 3),
-        'electric-engine-unit',
-        'battery',
         ...repeat('flying-robot-frame', 2),
-        'plastic-bar',
         ...repeat('low-density-structure', 4),
         ...repeat('utility-science-pack', 2),
         'productivity-module',
@@ -70,20 +68,23 @@ export function onDemandFactory() {
         'piercing-rounds-magazine',
         'grenade',
         ...repeat('military-science-pack', 1),
-        'sulfur',
         ...repeat('chemical-science-pack', 3),
         'iron-stick',
         'rail',
         ...repeat('production-science-pack', 2),
     ];
 
+    const fullFactory = false;
+
     // control block
     let previousBlock: Fbp | undefined = undefined;
     const editor = new Editor(factory);
-    const controlBlock = buildControlBlock();
-    previousBlock = controlBlock;
-    editor.addBlueprint(controlBlock);
-    editor.d(2);
+    const controlBlock = fullFactory ? buildControlBlock() : undefined;
+    if (controlBlock) {
+        previousBlock = controlBlock;
+        editor.addBlueprint(controlBlock);
+        editor.d(2);
+    }
 
     function interconnect(block1: Fbp, block2: Fbp, network: Network, point: string) {
         factory.addConnection(network,
@@ -93,42 +94,60 @@ export function onDemandFactory() {
     }
 
     const fluidConnections: FluidConnection[] = [];
-    sciencePacksFactory.map(r => recipes[r]).forEach(r => {
-        const block = onDemandFactoryBlock(r);
-        const blockPos = editor.cursor;
-        editor.addBlueprint(block);
-        editor.d(4);
+    const chunkSize = 2;
+    const rows = _.chunk(testFactory2/*sciencePacksFactory*/, chunkSize);
 
-        if (previousBlock !== undefined) {
+    rows.forEach((rowRecipes, chunkIndex) => {
+        previousBlock = undefined;
+        const rowFbp = new Fbp('row-' + chunkIndex);
+        const rowEditor = new Editor(rowFbp);
+        rowRecipes.map(r => recipes[r]).forEach(r => {
+            const block = onDemandFactoryBlock(r, { busBack: false });
+            const blockPos = rowEditor.cursor;
+            rowEditor.addBlueprint(block);
+            rowEditor.d(4);
 
-            interconnect(previousBlock, block, Network.Red, 'busTransactions');
-            interconnect(previousBlock, block, Network.Green, 'busTransactions');
-            interconnect(previousBlock, block, Network.Red, 'demand');
-            interconnect(previousBlock, block, Network.Electric, 'busTransactions');
+            if (previousBlock !== undefined) {
 
-            ['pipe1', 'pipe2'].forEach(pipeExportName => {
-                const pipe = block.exports[pipeExportName] as (PipeConnection | undefined);
-                if (!!pipe) {
-                    const pipe1Position = block.elements.find(e => e.entity === pipe.entity)!.position;
-                    const y = blockPos.y + pipe1Position.y;
-                    fluidConnections.push({ fluid: pipe.fluid, position: y });
-                }
-            });
+                interconnect(previousBlock, block, Network.Red, 'busTransactions');
+                interconnect(previousBlock, block, Network.Green, 'busTransactions');
+                interconnect(previousBlock, block, Network.Electric, 'busTransactions');
+                interconnect(previousBlock, block, Network.Red, 'demand');
+
+                ['pipe1', 'pipe2'].forEach(pipeExportName => {
+                    const pipe = block.exports[pipeExportName] as (PipeConnection | undefined);
+                    if (!!pipe) {
+                        const pipe1Position = block.elements.find(e => e.entity === pipe.entity)!.position;
+                        const y = blockPos.y + pipe1Position.y;
+                        fluidConnections.push({ fluid: pipe.fluid, position: y });
+                    }
+                });
+            }
+            previousBlock = block;
+        });
+
+        editor.moveTo(chunkIndex * 12, 0);
+        if (chunkIndex % 2 === 1) {
+            rowFbp.rotate(2);
         }
-        previousBlock = block;
+        editor.addBlueprint(rowFbp);
     });
 
     // add return
-    editor.r(10);
-    editor.add(new TransportBelt(), Direction.Right);
-    editor.r();
-    editor.add(new TransportBelt(), Direction.Right);
-    editor.r();
-    editor.add(new TransportBelt(), Direction.Up);
+    if (false && fullFactory) {
+        editor.r(10);
+        editor.add(new TransportBelt(), Direction.Right);
+        editor.r();
+        editor.add(new TransportBelt(), Direction.Right);
+        editor.r();
+        editor.add(new TransportBelt(), Direction.Right);
+        editor.r();
+        editor.add(new TransportBelt(), Direction.Up);
+    }
 
     // add fluid bus
-    const fluidBus = layoutPipes(fluidConnections, ['water', 'petroleum-gas', 'sulfuric-acid', 'lubricant']);
-    editor.moveTo(-5, 0).addBlueprint(fluidBus);
+    // FDO: const fluidBus = layoutPipes(fluidConnections, ['water', 'petroleum-gas', 'sulfuric-acid', 'lubricant']);
+    // FDO: editor.moveTo(-5, 0).addBlueprint(fluidBus);
 
     return factory;
 }

@@ -53,7 +53,7 @@ export function loadPlan(plan: string): Plan {
 }
 
 export function planToBlueprint(planString: string, //
-    entitiesBuilders: Record<string, () => Entity>, //
+    entitiesBuilders: Record<string, () => Entity | undefined>, //
     connections: [
         Network, // network
             string | { id: string, circuit: 'input' | 'output' }, // point1
@@ -103,9 +103,11 @@ export function planToBlueprint(planString: string, //
         }
 
         // default to wooden chest
-        const entity = entitiesBuilders?.[id]?.() ?? new WoodenChest();
-        planElements.add(id, { entity: entity, position: element.position, direction: element.direction });
-        fbp.addEntity(element.position, entity, element.direction);
+        const entity = entitiesBuilders?.[id]?.();
+        if (entity !== undefined) {
+            planElements.add(id, { entity: entity, position: element.position, direction: element.direction });
+            fbp.addEntity(element.position, entity, element.direction);
+        }
     }
 
     for (let connection of connections) {

@@ -11,9 +11,9 @@ aaU.bbR.
 ccD.ddL.
 `;
 
-class TestEntity extends Entity {
-    constructor(public id: string) {
-        super('battery', 1, 1);
+export class TestEntity extends Entity {
+    constructor(public id: string, width: number = 1, height: number = 1) {
+        super('battery', width, height);
     }
 
     public input: ConnectionPoint = new ConnectionPoint(this, '1');
@@ -24,6 +24,11 @@ describe('loadPlan', () => {
     test('loads a plan', () => {
         const fbp = loadPlan(plan);
         expect(fbp.elements.keys()).toContain('aa');
+    });
+    test('ignores leading spaces', () => {
+        const fbp = loadPlan('       aa .bb .');
+        expect(fbp.elements.keys()).toContain('aa');
+        expect(fbp.elements.keys()).toContain('bb');
     });
 });
 

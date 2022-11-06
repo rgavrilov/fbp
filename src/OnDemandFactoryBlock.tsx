@@ -40,16 +40,17 @@ cc - ingredients constant combinator
 ts - throttle sensor
 ti - throttle ingredients
 pf - pick-up filter, decider that isolates ingr pick-up inserter from being controlled from the bus-trans network
+bb - bus-back, reverse loop on the main buss
  */
 const planString: string = `
-ybD.ybD.rbD.m1#.amL.---.---.iiR.ic .ipR.bsD.tsD.ybU.
-ybD.ybD.rbD.m2#.---.---.---.iaR.---.cc .btD.---.ybU.
-ybD.ybD.rbD.m3#.---.---.---.peL.pc .pdL.ybD.tiU.ybU.
-ybD.ybD.rbD.   .bp .pfL.   .dfR.---.dp .ybD.---.ybU.
+ybD.ybD.rbD.m1#.amL.---.---.iiR.ic .ipR.bsD.tsD.---.bbU.
+ybD.ybD.rbD.m2#.---.---.---.iaR.---.cc .btD.---.---.bbU.
+ybD.ybD.rbD.m3#.---.---.---.peL.pc .pdL.ybD.tiU.---.bbU.
+ybD.ybD.rbD.   .bp .pfL.   .dfR.---.dp .ybD.---.---.bbU.
 `;
 
 
-export function onDemandFactoryBlock(recipe: Recipe): Fbp {
+export function onDemandFactoryBlock(recipe: Recipe, options: { busBack?: boolean }): Fbp {
     const fbp = planToBlueprint(planString, {
         am: () => {
             switch (recipe.equipment) {
@@ -75,7 +76,8 @@ export function onDemandFactoryBlock(recipe: Recipe): Fbp {
                 })),
             });
             return ingredientsConstant;
-        },   ii: () => new FastInserter(),
+        },
+        ii: () => new FastInserter(),
         ic: () => new WoodenChest(),
         pc: () => new WoodenChest(),
         ip: () => new FilterInserter({
@@ -102,6 +104,7 @@ export function onDemandFactoryBlock(recipe: Recipe): Fbp {
         }),
         ts: () => new PositiveDetector(),
         ti: () => new PositiveDetector(),
+        bb: () => options.busBack !== false ? new TransportBelt() : undefined,
     }, [
         [Network.Electric, 'bp', 'dp'],
         [Network.Red, 'ip', 'pf:input'],
