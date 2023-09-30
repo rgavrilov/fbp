@@ -5,7 +5,7 @@ export class AssemblingMachine extends Entity {
     recipe!: Recipe;
 
     constructor(init?: Partial<AssemblingMachine> & { recipe: Recipe }) {
-        super('assembling-machine-3', 3, 3);
+        super('assembling-machine-2', 3, 3);
         Object.assign(this, init);
     }
 

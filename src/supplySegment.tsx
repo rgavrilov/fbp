@@ -8,9 +8,7 @@ import { UndergroundBelt } from './UndergroundBelt';
 import { FastInserter, LongHandedInserter } from './inserters';
 import { UndergroundPipe } from './UndergroundPipe';
 
-export const supplyBeltMap: Partial<Record<Item | Fluid, number>> = {
-    'copper-plate': 1, 'iron-plate': 1, 'steel-plate': 2, 'electronic-circuit': 2, 'coal': 3, 'stone': 3,
-};
+export type SupplyBeltMap = Partial<Record<Item | Fluid, number>>;
 
 function useNextAvailableSpot(availableSpots: Record<string, boolean>): number {
     const availableSpot = Number(_.findKey(availableSpots, spot => spot));
@@ -21,11 +19,11 @@ function useNextAvailableSpot(availableSpots: Record<string, boolean>): number {
     return availableSpot;
 }
 
-export function buildSupplySegment(e: Editor, recipe: Recipe) {
+export function buildSupplySegment(e: Editor, recipe: Recipe, supplyBelt: SupplyBeltMap) {
     const ingredients = _.keys(recipe.ingredients) as (Item | Fluid)[];
 
     // figure out which ingredient inserts to use
-    const ingredientBelts = _.chain(ingredients).map(i => supplyBeltMap[i]).filter(v => v !== undefined).uniq().value();
+    const ingredientBelts = _.chain(ingredients).map(i => supplyBelt[i]).filter(v => v !== undefined).uniq().value();
 
     const availableSpots: Record<string, boolean> = { 1: true, 2: true, 3: true };
 
@@ -60,12 +58,13 @@ export function buildSupplySegment(e: Editor, recipe: Recipe) {
         e.fbp.addExport('pipe1', { fluid: fluidIngredients[0], entity: undergroundPipe });
     } else if (recipe.equipment === 'chemical-plant') {
 
-        const fluidPositions: { [item in Item]?: ([Fluid] | [Fluid, Fluid]) } = {
+        const fluidPositions: { [item in (Item | Fluid)]?: ([Fluid] | [Fluid, Fluid]) } = {
             'sulfur': ['petroleum-gas', 'water'],
             'battery': ['sulfuric-acid'],
             'plastic-bar': ['petroleum-gas'],
             'explosives': ['water'],
             'solid-fuel': ['light-oil'],
+            'sulfuric-acid': ['water'],
         };
         const recipeFluids = fluidPositions[recipe.item]!;
 
@@ -95,8 +94,8 @@ export function buildSupplySegment(e: Editor, recipe: Recipe) {
         e.moveTo(3, spot - 1).add(new FastInserter(), Direction.Left);
     }
 
-    // if product goes back on the supply belt (as is the case for electronic-circuit) hen add put extractors
-    const productBelt = supplyBeltMap[recipe.item];
+    // if product goes back on the supply belt (as is the case for electronic-circuit) then add put-extractors
+    const productBelt = supplyBelt[recipe.item];
     if (productBelt) {
         const inserter = productBelt === 1 ? new FastInserter() : new LongHandedInserter();
         const spot = useNextAvailableSpot(availableSpots);

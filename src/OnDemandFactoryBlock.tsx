@@ -15,9 +15,9 @@ import { planToBlueprint } from './PlanBuilder';
 import { PositiveDetector, PositiveFilter } from './DeciderCombinator';
 import { ChemicalPlant } from './ChemicalPlant';
 import { ElectricFurnace } from './ElectricFurnace';
-import { buildSupplySegment, supplyBeltMap } from './supplySegment';
+import { buildSupplySegment, SupplyBeltMap } from './supplySegment';
 
-const ingredientsOverstockMultiplier = 10;
+const overstockMultiplier = 10;
 
 /*
 yb - down, yellow, belt
@@ -50,7 +50,11 @@ ybD.ybD.rbD.   .bp .pfL.   .dfR.---.dp .ybD.---.---.bbU.
 `;
 
 
-export function onDemandFactoryBlock(recipe: Recipe, options: { busBack?: boolean }): Fbp {
+export function onDemandFactoryBlock(
+    recipe: Recipe,
+    supplyBeltMap: SupplyBeltMap,
+    options?: { includeReverseBus?: boolean, overstockMultiplier?: number },
+): Fbp {
     const fbp = planToBlueprint(planString, {
         am: () => {
             switch (recipe.equipment) {
@@ -65,14 +69,17 @@ export function onDemandFactoryBlock(recipe: Recipe, options: { busBack?: boolea
             }
         },
         yb: () => new TransportBelt(),
-        rb: () => new FastTransportBelt(),
+        rb: () => new TransportBelt(), // new FastTransportBelt(),
         bp: () => new ElectricPole(),
         dp: () => new ElectricPole(),
         cc: () => {
+            if (recipe.craftingTime === undefined) {
+                throw new Error(`Recipe ${recipe.item} doesn't have crafting time set.`);
+            }
             const nonBusIngredients = _.omit(recipe.ingredients, _.keys(supplyBeltMap).concat(fluids));
             const ingredientsConstant = new ConstantCombinator({
                 signals: _.map(nonBusIngredients, (quantity, item) => ({
-                    signal: item, count: -quantity! * ingredientsOverstockMultiplier,
+                    signal: item, count: -1 * Math.ceil(quantity! * (options?.overstockMultiplier ?? overstockMultiplier) / recipe.craftingTime),
                 })),
             });
             return ingredientsConstant;
@@ -88,7 +95,7 @@ export function onDemandFactoryBlock(recipe: Recipe, options: { busBack?: boolea
         pf: () => new PositiveFilter(),
         pe: () => new FastInserter({
             enabledCondition: {
-                firstOperand: recipe.item, secondOperand: 50, operator: 'lt',
+                firstOperand: recipe.item, secondOperand: 5, operator: 'lt',
             },
         }),
         pd: () => new FastInserter({
@@ -104,7 +111,7 @@ export function onDemandFactoryBlock(recipe: Recipe, options: { busBack?: boolea
         }),
         ts: () => new PositiveDetector(),
         ti: () => new PositiveDetector(),
-        bb: () => options.busBack !== false ? new TransportBelt() : undefined,
+        bb: () => options?.includeReverseBus !== false ? new TransportBelt() : undefined,
     }, [
         [Network.Electric, 'bp', 'dp'],
         [Network.Red, 'ip', 'pf:input'],
@@ -127,7 +134,7 @@ export function onDemandFactoryBlock(recipe: Recipe, options: { busBack?: boolea
     });
 
     // add supply
-    buildSupplySegment(new Editor(fbp), recipe);
+    buildSupplySegment(new Editor(fbp), recipe, supplyBeltMap);
 
     return fbp;
 }

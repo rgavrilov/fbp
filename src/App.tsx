@@ -1,43 +1,29 @@
 import './App.css';
 import { buildBlueprintExport, getBlueprintExchangeString } from './blueprintExport';
 import { onDemandFactory } from './OnDemandFactory';
+// import {
+//     mallSequence1, mallSequence1SupplyBeltMap, mallSequence2, mallSequence2SupplyBeltMap,
+// } from './factories/mallSequence1';
+// import { blockSequence, supplyBeltMap } from './factories/yellowAndPurpleFactory';
+ // import { blockSequence, supplyBeltMap } from './factories/redCircuitTest';
+import { ForwardedRef, forwardRef, FunctionComponent } from 'react';
+import { factory as blockSequence, supplyBeltMap } from './factories/artilleryShellsFactory';
 
-// const bpDiagram = `
-// Db.Db.Rb.  .  .At....IpIcIfDbUb
-// Db.Db.Rb  ......PePcPdDbUb
-// Db.Db.Rb  ......DcDfIiDbUb
-// Db.Db.Rb  P1CcP2      DbUb
-// `;
-//
-// const bpEntities = {
-//     // Down belt
-//     Db: [() => new TransportBelt(), Direction.Down],
-//     // Red down belt
-//     Rb: [()=> new FastTransportBelt(), Direction.Down],
-//     // Up belt
-//     Up: [()=>new TransportBelt(),Direction.Up],
-//     At: [()=>new AssemblingMachine({recipe: recipes.plasticBar})],
-// }
-//
-// const exports = {
-//     P1: "demand",
-//     P2: "control"
-// };
-//
-// const connections = [
-//     [Network.Green,'Pe','Pc'],
-//
-// ];
-//
-// const electricConnections = [
-//     ['P1', 'P2']
-// ];
+type DisabledWithMessage = { disabled: boolean | string | undefined };
 
 function App() {
 
-    const factory = onDemandFactory();
+    const factory = onDemandFactory(
+        true,
+        blockSequence,
+        19,
+        supplyBeltMap,
+    );
 
-    return (<div className="App" style={ { 'minWidth': '100%', 'width': '800px' } }>
+    return (<div className="App" style={ {
+        'minWidth': '100%',
+        'width': '800px',
+    } }>
         <textarea defaultValue={ getBlueprintExchangeString(factory) } rows={ 10 } style={ { 'minWidth': '100%' } }/>
         <div>
             <button type="button"
@@ -45,9 +31,12 @@ function App() {
                 Copy to Clipboard
             </button>
         </div>
-        <pre style={ { textAlign: 'left', border: 'solid thin black', padding: '10px' } }>
-            { JSON.stringify(buildBlueprintExport(factory), null, 4) }
-        </pre>
+        <textarea defaultValue={ JSON.stringify(
+            buildBlueprintExport(factory),
+            null,
+            4,
+        ) } rows={ 50 }
+                  style={ { 'minWidth': '100%' } }/>
     </div>);
 }
 

@@ -106,26 +106,6 @@ export const buildBlueprintExport = (fbp: Fbp) => {
             ...element.entity.getBlueprintOutputAttributes(),
         };
 
-        // // network connections
-        // fbp.connections.filter(c => c.point1.entity === element.entity).forEach(c => {
-        //     const [source, dest] = [c.point1, c.point2];
-        //     addConnectionToEntity(source.circuit, dest, bpOutputEntity, c.network);
-        // });
-        // fbp.connections.filter(c => c.point2.entity === element.entity).forEach(c => {
-        //     const [dest, source] = [c.point1, c.point2];
-        //     addConnectionToEntity(source.circuit, dest, bpOutputEntity, c.network);
-        // });
-        //
-        // // electric connections
-        // fbp.connections.filter(ec => ec.point1.entity === element.entity).forEach(ec => {
-        //     bpOutputEntity.neighbours ??= [];
-        //     bpOutputEntity.neighbours.push(getBPEntityId(ec[1]));
-        // });
-        // fbp.electricConnections.filter(ec => ec[1] === element.entity).forEach(ec => {
-        //     bpOutputEntity.neighbours ??= [];
-        //     bpOutputEntity.neighbours.push(getBPEntityId(ec[0]));
-        // });
-
         entityToBpEntityMap.set(element.entity, bpOutputEntity);
         output.blueprint.entities.push(bpOutputEntity);
     }
@@ -153,10 +133,8 @@ export const buildBlueprintExport = (fbp: Fbp) => {
                     c.point1.circuit,
                     c.network,
                 );
-
-                // addConnectionToEntity(c.point1.circuit, c.point2, bpEntity1, network);
-                // addConnectionToEntity(c.point2.circuit, c.point1, bpEntity2, network);
                 break;
+
             case Network.Electric:
                 addElectricalConnection(bpEntity1, bpEntity2);
                 addElectricalConnection(bpEntity2, bpEntity1);

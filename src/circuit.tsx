@@ -24,6 +24,8 @@ function getSignalType(signal: Signal) {
         return 'fluid';
     } else if (_.includes(virtualSignals, signal)) {
         return 'virtual';
+    } else {
+        throw new Error(`Couldn't determine a type of signal '${ signal }'.`);
     }
 }
 

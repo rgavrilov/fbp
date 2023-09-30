@@ -6,7 +6,7 @@ import { Circuit, Network } from './circuit';
 import { Fluid } from './Items';
 import { UndergroundPipe } from './UndergroundPipe';
 import { Dimensions } from './Dimensions';
-import _ from 'lodash';
+import _, { forEach } from 'lodash';
 
 export type Element = { position: Position, entity: Entity, direction: Direction };
 

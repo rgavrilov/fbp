@@ -34,6 +34,8 @@
     'electric-furnace',
     'electric-mining-drill',
     'electronic-circuit',
+    'explosive-cannon-shell',
+    'artillery-shell',
     'empty-barrel',
     'energy-shield-equipment',
     'energy-shield-mk2-equipment',
@@ -166,8 +168,22 @@
     'production-science-pack',
     'stone-brick',
 
+    'speed-module',
+    'defender-capsule',
+    'distractor-capsule',
+    'poison-capsule',
+    'slowdown-capsule',
+    'destroyer-capsule',
+    'cliff-explosives',
+    'repair-pack',
+
     // extensions
     'gui-signal-display',
+
+    // extensions
+    'ammo-nano-termites',
+    'ammo-nano-constructors',
+
 ] as const;
 
 export type Item = typeof items[number];
