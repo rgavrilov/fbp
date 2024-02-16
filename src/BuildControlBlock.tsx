@@ -8,8 +8,8 @@ import { TransportBelt } from './transportBelts';
 export function buildControlBlock() {
 
     const plan = `
-   .   .   .   .   .tp .iaD.   .aaU.   .dp .   .   .   .   .
-   .   .   .   .   .s1 .   .s2 .   .   .   .   .   .   .   .`;
+   .   .   .   .   .   .   .   .iaD.   .aaU.   .   .   .   .   .
+   .   .   .   .   .   .tp .s1 .   .s2 .   .dp .   .   .   .   .`;
 
     return planToBlueprint(plan, {
         tp: () => new ElectricPole(),

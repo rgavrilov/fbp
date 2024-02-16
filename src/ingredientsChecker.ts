@@ -1,6 +1,14 @@
 ﻿import { FactorioRecipe, FactorioRecipeName, factorioRecipes } from './recipesExport';
+import { FactoryBlockSpec } from './factories/factory';
+import _ from 'lodash';
 
-export function getMissingRecipes(productionRecipes: FactorioRecipeName[], available: FactorioRecipe[]): FactorioRecipeName[] {
+export function getMissingRecipes(
+    productionBlocks: FactoryBlockSpec[],
+    available: FactorioRecipe[],
+): FactorioRecipeName[] {
+
+    const productionRecipes = _.map(productionBlocks, 'recipe');
+
     const processed = new Set<FactorioRecipeName>();
     const unprocessedQueue = new Set<FactorioRecipeName>();
     productionRecipes.forEach(r => {

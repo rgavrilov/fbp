@@ -13,26 +13,26 @@ import { ConnectionPoint } from './ConnectionPoint';
 import { SupplyBeltMap } from './supplySegment';
 import { getMissingRecipes } from './ingredientsChecker';
 import { fluids } from './Items';
+import { FactoryBlockSpec } from './factories/factory';
 
 function interconnect(block1: Fbp, block2: Fbp, network: Network, point: string, factory: Fbp) {
     factory.addConnection(network, block1.exports[point] as ConnectionPoint, block2.exports[point] as ConnectionPoint);
 }
 
 export function onDemandFactory(fullFactory: boolean,
-    factorySequence: FactorioRecipeName[],
+    factorySequence: FactoryBlockSpec[],
     chunkSize: number,
     supplyBeltMap: SupplyBeltMap,
 ) {
 
-    const missingIngredients = getMissingRecipes(
-        factorySequence,
+    const missingIngredients = getMissingRecipes(factorySequence,
         Object.keys(supplyBeltMap).concat(fluids).concat([]),
     );
     if (missingIngredients.length) {
-        console.error("Missing the following ingredients:\n", missingIngredients.join(", "));
+        console.error('Missing the following ingredients:\n', missingIngredients.join(', '));
     }
 
-    console.log("Factory size:", factorySequence.length);
+    console.log('Factory size:', factorySequence.length);
 
     const factory = new Fbp('factory');
 
@@ -48,12 +48,28 @@ export function onDemandFactory(fullFactory: boolean,
 
     const fluidConnections: FluidConnection[] = [];
     const rows = _.chunk(factorySequence, chunkSize);
+    const ringSize = factorySequence.length;
 
     rows.forEach((rowRecipes, chunkIndex) => {
         const rowFbp = new Fbp('row-' + chunkIndex);
         const rowEditor = new Editor(rowFbp);
-        rowRecipes.map(r => recipes[r]).forEach(r => {
-            const block = onDemandFactoryBlock(r, supplyBeltMap, { includeReverseBus: true, overstockMultiplier: 10 * 0.75 });
+        rowRecipes.forEach((blockSpec, rowBlockIndex) => {
+            const ringBlockIndex = chunkIndex * chunkSize + rowBlockIndex;
+            const recipe = recipes[blockSpec.recipe];
+
+            // find distance between blocks (in circle)
+            const nonBusIngredients = _.omit(recipe.ingredients, _.keys(supplyBeltMap).concat(fluids));
+
+            const nonBusIngredientsDistances = _.mapValues(nonBusIngredients, (quantity, item) => {
+                // find ingredient source block index
+                const sourceBlockIndex = _.findIndex(factorySequence, i => i.recipe === item);
+                return (ringSize + ringBlockIndex - sourceBlockIndex) % ringSize;
+            });
+
+            const block = onDemandFactoryBlock(recipe, blockSpec,
+                supplyBeltMap,
+                { includeReverseBus: true, busLength: factorySequence.length, ingredientsDistances: nonBusIngredientsDistances },
+            );
             const blockPos = rowEditor.cursor;
             rowEditor.addBlueprint(block);
             rowEditor.d(4);
@@ -81,7 +97,7 @@ export function onDemandFactory(fullFactory: boolean,
             rowFbp.rotate(2);
         }
         editor.addBlueprint(rowFbp);
-        editor.r(12);
+        editor.r(13);
 
         // Note: I do not interconnect rows yet.
         // TODO: interconnect rows
@@ -101,8 +117,8 @@ export function onDemandFactory(fullFactory: boolean,
     }
 
     // add fluid bus
-    const fluidBus = layoutPipes(fluidConnections, ['water', 'petroleum-gas', 'sulfuric-acid', 'lubricant']);
-    editor.moveTo(-5, fullFactory ? 2 : 0).addBlueprint(fluidBus);
+    const fluidBus = layoutPipes(fluidConnections, ['water', 'petroleum-gas', 'lubricant', 'sulfuric-acid']);
+    editor.moveTo(-6, fullFactory ? 2 : 0).addBlueprint(fluidBus);
 
     return factory;
 }

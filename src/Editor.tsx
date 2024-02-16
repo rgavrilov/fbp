@@ -89,5 +89,7 @@ export class Editor {
 
     remove(x: number, y: number) {
         _.remove(this.fbp.elements, e => e.position.x === x && e.position.y === y);
+        this.moveTo(x, y)
+        return this;
     }
 }

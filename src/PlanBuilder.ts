@@ -102,7 +102,6 @@ export function planToBlueprint(planString: string, //
             console.warn(`No entity builder provided for element with id: ${ id }.`);
         }
 
-        // default to wooden chest
         const entity = entitiesBuilders?.[id]?.();
         if (entity !== undefined) {
             planElements.add(id, { entity: entity, position: element.position, direction: element.direction });

@@ -11,6 +11,7 @@
 export type FactorioRecipe = {
     name: string, //
     ingredients: { amount: number, name: string }[], //
+    energy_required: number, // 
     category: FactorioManufacturingTypes
 } & any;
 
@@ -6485,6 +6486,7 @@ export const factorioRecipes: { [key: string]: FactorioRecipe } = {
     },
     'ammo-nano-termites': {
         name: 'ammo-nano-termites',
+        energy_required: 2,
         ingredients: [
             {
                 amount: 1,
@@ -6504,6 +6506,7 @@ export const factorioRecipes: { [key: string]: FactorioRecipe } = {
     },
     'ammo-nano-constructors': {
         name: 'ammo-nano-constructors',
+        energy_required: 2,
         ingredients: [
             {
                 amount: 1,

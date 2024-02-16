@@ -3,90 +3,68 @@ import { SupplyBeltMap } from '../supplySegment';
 import { repeat } from './repeat';
 import _ from 'lodash';
 
-export const mallSequence2SupplyBeltMap: SupplyBeltMap = {
-    'copper-plate': 3, //
-    'iron-plate': 3, //
-    'steel-plate': 2, //
-    'electronic-circuit': 2, //
-    'coal': 1, //
-    // 'stone': 1, //
-    'iron-gear-wheel': 1, //
-};
-
 export const mallSequence1SupplyBeltMap: SupplyBeltMap = {
-    'copper-plate': 1, //
     'iron-plate': 1, //
-    'steel-plate': 2, //
+    'copper-plate': 1, //
     'electronic-circuit': 2, //
-    'coal': 3, //
-    // 'stone': 3, //
-    'iron-gear-wheel': 3, //
+    'iron-gear-wheel': 2, //
+    'steel-plate': 3, //
+    // 'advanced-circuit': 3, //
+    'coal': 4, //
+    'stone': 4, //
 };
 
-const stage = 1;
 type Segment = 'nuclear' | 'blue-belts' | 'networks';
-const segments: Segment[] = [];
+const segments: Segment[] = ['blue-belts'];
 
-const r = (recipe: FactorioRecipeName, options?: { repeat?: number, stage?: number, segment?: Segment }) => {
-    if (options?.stage !== undefined && options.stage > stage) {
-        return [];
-    }
-
+const r = (recipe: FactorioRecipeName, options?: { repeat?: number, segment?: Segment }) => {
     if (options?.segment && !segments.includes(options.segment)) {
-        return [];
+        return [reserve];
     }
 
     return options?.repeat !== undefined ? repeat(recipe, options.repeat) : recipe;
 };
 
-export const mallSequence3: FactorioRecipeName[] = _.flatten([
-    r('battery', {repeat: 5}),
-    r('electric-engine-unit', { repeat: 2 }),
-    'express-transport-belt',
-    'express-transport-belt',
-]);
-
-
-export const mallSequence2: FactorioRecipeName[] = _.flatten([
-    'iron-stick',
-    'copper-cable',
-    'copper-cable',
-    'advanced-circuit',
-    'advanced-circuit',
-    'advanced-circuit',
-    'advanced-circuit',
-    'transport-belt',
-    'underground-belt',
-    'splitter',
-
-    'fast-transport-belt',
-    'fast-underground-belt',
-    'fast-splitter',
-]);
-
+const reserve: FactorioRecipeName = 'wooden-chest';
 
 export const mallSequence1: FactorioRecipeName[] = _.flatten([
-    'stone-brick',
+    // first block can't have fluid supply because of the pipe arrangement
+    reserve,
+
+    r('express-transport-belt', { segment: 'blue-belts' }),
+    r('express-underground-belt', { segment: 'blue-belts' }),
+    r('express-splitter', { segment: 'blue-belts' }),
 
     // fluid ingredients
     'sulfur',
     'plastic-bar',
-    // 'processing-unit',
-    r('express-transport-belt', { segment: 'blue-belts' }),
-    r('express-underground-belt', { segment: 'blue-belts' }),
-    r('express-splitter', { segment: 'blue-belts' }),
+    'processing-unit',
     'explosives',
-    'battery',
+    reserve,
+    r('battery', { repeat: 6 }),
+    reserve,
+    reserve,
+    reserve,
+
+    'engine-unit',
     'electric-engine-unit',
 
     // parts
+    // 'copper-cable',
+    // 'copper-cable',
+    // 'electronic-circuit',
+    // 'copper-cable',
+    // 'electronic-circuit',
+    // 'copper-cable',
+    // 'copper-cable',
+    // 'electronic-circuit',
+    // 'copper-cable',
+    // 'electronic-circuit',
     'copper-cable',
-    'copper-cable',
-    'electronic-circuit',
-    'copper-cable',
-    'electronic-circuit',
-    'advanced-circuit',
-    'iron-gear-wheel',
+    r('advanced-circuit', { repeat: 6 }),
+    reserve,
+    reserve,
+    // r('iron-gear-wheel', {repeat:3}),
 
     // belts
     'transport-belt',
@@ -98,13 +76,13 @@ export const mallSequence1: FactorioRecipeName[] = _.flatten([
     'fast-splitter',
 
     // inserters
-    'iron-gear-wheel',
+    // 'iron-gear-wheel',
     'inserter',
     'fast-inserter',
     'long-handed-inserter',
     'filter-inserter',
     'stack-inserter',
-    // 'stack-filter-inserter',
+    reserve, // 'stack-filter-inserter',
 
     // poles
     'iron-stick',
@@ -119,7 +97,7 @@ export const mallSequence1: FactorioRecipeName[] = _.flatten([
     //'storage-tank',
 
     // mining
-    'iron-gear-wheel',
+    // 'iron-gear-wheel',
     'electric-mining-drill',
     // 'pumpjack',
 
@@ -133,10 +111,10 @@ export const mallSequence1: FactorioRecipeName[] = _.flatten([
     // assembly tables
     'assembling-machine-1',
     'assembling-machine-2',
-    // 'assembling-machine-3',
+    'assembling-machine-3',
 
     // smelting
-    // 'steel-furnace',
+    'stone-brick',
     'electric-furnace',
 
     // rail-road
@@ -156,16 +134,14 @@ export const mallSequence1: FactorioRecipeName[] = _.flatten([
     r('arithmetic-combinator', { segment: 'networks' }),
     r('decider-combinator', { segment: 'networks' }),
 
-    // engines
-    'engine-unit',
-
     // robots
-    //'flying-robot-frame',
-    //'construction-robot',
-    //'logistic-robot',
+    'flying-robot-frame',
+    'construction-robot',
+    'logistic-robot',
 
     // military
-    //'stone-wall',
+    'stone-brick',
+    'stone-wall',
     // 'gate'
     'grenade',
     'firearm-magazine',
@@ -173,14 +149,15 @@ export const mallSequence1: FactorioRecipeName[] = _.flatten([
     'poison-capsule',
     'slowdown-capsule',
     'defender-capsule',
-    // 'distractor-capsule',
-    // 'destroyer-capsule',
-    // 'laser-turret',
+    reserve,
+    reserve, // 'destroyer-capsule',
+    reserve, // 'distractor-capsule',
+    'laser-turret',
 
     // misc
     'empty-barrel',
     'cliff-explosives',
-    //'steel-chest',
+    'steel-chest',
     'iron-stick',
     'repair-pack',
     'ammo-nano-termites',
@@ -190,5 +167,7 @@ export const mallSequence1: FactorioRecipeName[] = _.flatten([
     r('heat-pipe', { segment: 'nuclear' }),
     r('heat-exchanger', { segment: 'nuclear' }),
     r('steam-turbine', { segment: 'nuclear' }),
-    // 'centrifuge',
+    r('centrifuge', { segment: 'nuclear' }),
+
+    r(reserve, { repeat: 21 }),
 ]);

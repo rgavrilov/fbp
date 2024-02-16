@@ -1,6 +1,11 @@
 ﻿import { FactorioRecipeName } from '../recipesExport';
-import { repeat } from './repeat';
+import { block } from './factory';
 
 export const laserTurretsFactory: FactorioRecipeName[] = [
-    'sulfur', 'sulfuric-acid', 'copper-cable', 'electronic-circuit', ...repeat('battery', 3), 'laser-turret',
+    'sulfur',
+    'sulfuric-acid',
+    'copper-cable',
+    'electronic-circuit',
+    ...block([], 'battery', { repeat: 3 }),
+    'laser-turret',
 ];

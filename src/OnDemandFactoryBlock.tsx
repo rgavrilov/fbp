@@ -1,7 +1,7 @@
 import { fluids } from './Items';
 import { Fbp } from './Fbp';
 import { Editor } from './Editor';
-import { FastTransportBelt, TransportBelt } from './transportBelts';
+import { TransportBelt } from './transportBelts';
 import _ from 'lodash';
 import { FastInserter, FilterInserter } from './inserters';
 import { AssemblingMachine } from './AssemblingMachine';
@@ -16,8 +16,7 @@ import { PositiveDetector, PositiveFilter } from './DeciderCombinator';
 import { ChemicalPlant } from './ChemicalPlant';
 import { ElectricFurnace } from './ElectricFurnace';
 import { buildSupplySegment, SupplyBeltMap } from './supplySegment';
-
-const overstockMultiplier = 10;
+import { FactoryBlockSpec } from './factories/factory';
 
 /*
 yb - down, yellow, belt
@@ -43,17 +42,19 @@ pf - pick-up filter, decider that isolates ingr pick-up inserter from being cont
 bb - bus-back, reverse loop on the main buss
  */
 const planString: string = `
-ybD.ybD.rbD.m1#.amL.---.---.iiR.ic .ipR.bsD.tsD.---.bbU.
-ybD.ybD.rbD.m2#.---.---.---.iaR.---.cc .btD.---.---.bbU.
-ybD.ybD.rbD.m3#.---.---.---.peL.pc .pdL.ybD.tiU.---.bbU.
-ybD.ybD.rbD.   .bp .pfL.   .dfR.---.dp .ybD.---.---.bbU.
+ybD.ybD.ybD.rbD.m1#.amL.---.---.iiR.ic .ipR.bsD.tsD.---.---.
+ybD.ybD.ybD.rbD.m2#.---.---.---.iaR.---.cc .btD.---.---.---.
+ybD.ybD.ybD.rbD.m3#.---.---.---.peL.pc .pdL.ybD.tiU.---.---.
+ybD.ybD.ybD.rbD.   .bp .pfL.   .dfR.---.dp .ybD.---.---.---.
 `;
 
 
-export function onDemandFactoryBlock(
-    recipe: Recipe,
+export function onDemandFactoryBlock(recipe: Recipe,
+    blockSpec: FactoryBlockSpec,
     supplyBeltMap: SupplyBeltMap,
-    options?: { includeReverseBus?: boolean, overstockMultiplier?: number },
+    options?: {
+        includeReverseBus?: boolean, busLength?: number, ingredientsDistances?: { [item: string]: number }
+    },
 ): Fbp {
     const fbp = planToBlueprint(planString, {
         am: () => {
@@ -74,12 +75,24 @@ export function onDemandFactoryBlock(
         dp: () => new ElectricPole(),
         cc: () => {
             if (recipe.craftingTime === undefined) {
-                throw new Error(`Recipe ${recipe.item} doesn't have crafting time set.`);
+                throw new Error(`Recipe ${ recipe.item } doesn't have crafting time set.`);
             }
             const nonBusIngredients = _.omit(recipe.ingredients, _.keys(supplyBeltMap).concat(fluids));
+
+            const yellowTransporterBeltSpeed = 1.875;
+
+            function getIngredientCount(quantity: number, distance: number) {
+                return Math.ceil(quantity * (blockSpec.ingredientsMultiplier +
+                    (blockSpec.stockpileIngredientsForContinuousProduction ? distance / yellowTransporterBeltSpeed /
+                        recipe.craftingTime : 0)));
+            }
+
             const ingredientsConstant = new ConstantCombinator({
-                signals: _.map(nonBusIngredients, (quantity, item) => ({
-                    signal: item, count: -1 * Math.ceil(quantity! * (options?.overstockMultiplier ?? overstockMultiplier) / recipe.craftingTime),
+                signals: _.map(nonBusIngredients as { [key: string]: number }, (quantity: number, item: string) => ({
+                    signal: item,
+                    count: -1 * getIngredientCount(quantity,
+                        (options?.ingredientsDistances?.[item] ?? options?.busLength ?? 54) * 4,
+                    ),
                 })),
             });
             return ingredientsConstant;
@@ -95,7 +108,7 @@ export function onDemandFactoryBlock(
         pf: () => new PositiveFilter(),
         pe: () => new FastInserter({
             enabledCondition: {
-                firstOperand: recipe.item, secondOperand: 5, operator: 'lt',
+                firstOperand: recipe.item, secondOperand: blockSpec.productLimit, operator: 'lt',
             },
         }),
         pd: () => new FastInserter({
