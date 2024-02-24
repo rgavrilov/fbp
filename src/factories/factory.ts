@@ -1,5 +1,6 @@
 ﻿import { FactorioRecipeName } from '../recipesExport';
 import _ from 'lodash';
+import { SupplyBeltMap } from '../supplySegment';
 
 export type Segment = 'nuclear' | 'blue-belts' | 'networks';
 
@@ -20,7 +21,12 @@ export const block = (segments: Segment[],
 
 export type FactoryBlockSpec = {
     recipe: FactorioRecipeName,
-    ingredientsMultiplier: number,
-    stockpileIngredientsForContinuousProduction: boolean,
+    ingredientsMultiplier?: number,
+    stockpileIngredientsForContinuousProduction?: boolean,
     productLimit: number,
+};
+
+export type FactoryLayout = {
+    supplyBeltMap: SupplyBeltMap,
+    factorySequence: (FactorioRecipeName | FactoryBlockSpec)[],
 };

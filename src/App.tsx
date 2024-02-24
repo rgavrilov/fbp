@@ -1,44 +1,17 @@
 import './App.css';
 import { buildBlueprintExport, getBlueprintExchangeString } from './blueprintExport';
-import { FactoryBlockSpec, onDemandFactory } from './OnDemandFactory';
-import {
-    mallSequence1, mallSequence1SupplyBeltMap,
-} from './factories/mallSequence1';
-// import { blockSequence, supplyBeltMap } from './factories/yellowAndPurpleFactory';
-// import { blockSequence, supplyBeltMap } from './factories/redCircuitTest';
-// import { ForwardedRef, forwardRef, FunctionComponent } from 'react';
-// import { factory as blockSequence, supplyBeltMap } from './factories/artilleryShellsFactory';
+import { onDemandFactory } from './OnDemandFactory';
 
-import { factoryLayout as phase1FactoryLayout } from './factories/phase1Factory';
 import { factoryLayout as militaryFactoryLayout } from './factories/militaryFactory';
-import _ from 'lodash';
 
 type DisabledWithMessage = { disabled: boolean | string | undefined };
 
 function App() {
 
-    const factoryLayout = phase1FactoryLayout;
-    // militaryFactoryLayout;
+    // const factoryLayout = phase1FactoryLayout;
+    const factoryLayout = militaryFactoryLayout;
 
-    const blockSequence: FactoryBlockSpec[] = _.map(factoryLayout.factorySequence, (recipe) => {
-        if (typeof recipe === 'string') {
-            return {
-                recipe: recipe,
-                ingredientsMultiplier: 1,
-                productLimit: 1,
-                stockpileIngredientsForContinuousProduction: false,
-            };
-        }
-        else {
-            return recipe;
-        }
-    });
-
-    const paddedSequence = [
-        ...blockSequence, ...(blockSequence.length % 1 ? ['wooden-chest'] : []),
-    ];
-
-    const factory = onDemandFactory(true, paddedSequence, paddedSequence.length / 2, factoryLayout.supplyBeltMap);
+    const factory = onDemandFactory(true, factoryLayout);
 
     return (<div className="App" style={ {
         'minWidth': '100%', 'width': '800px',

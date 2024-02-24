@@ -1,7 +1,6 @@
 ﻿import { Fbp, PipeConnection } from './Fbp';
 import { Editor } from './Editor';
 import { onDemandFactoryBlock } from './OnDemandFactoryBlock';
-import { FactorioRecipeName } from './recipesExport';
 import _ from 'lodash';
 import { recipes } from './Recipe';
 import { FluidConnection, layoutPipes } from './FluidBus';
@@ -13,13 +12,43 @@ import { ConnectionPoint } from './ConnectionPoint';
 import { SupplyBeltMap } from './supplySegment';
 import { getMissingRecipes } from './ingredientsChecker';
 import { fluids } from './Items';
-import { FactoryBlockSpec } from './factories/factory';
+import { FactoryBlockSpec, FactoryLayout, reserve } from './factories/factory';
 
 function interconnect(block1: Fbp, block2: Fbp, network: Network, point: string, factory: Fbp) {
     factory.addConnection(network, block1.exports[point] as ConnectionPoint, block2.exports[point] as ConnectionPoint);
 }
 
-export function onDemandFactory(fullFactory: boolean,
+export function onDemandFactory(fullFactory: boolean, factoryLayout: FactoryLayout) {
+
+    const paddedSequence = [
+        ...factoryLayout.factorySequence, ...(factoryLayout.factorySequence.length % 1 ? [reserve] : []),
+    ];
+
+    const blockSequence: FactoryBlockSpec[] = _.map(paddedSequence, (recipe) => {
+        if (typeof recipe === 'string') {
+            const match = /^(.*?)(@(\d+))?$/g.exec(recipe);
+            if (match === null) {
+                throw 'Invalid recipe string: ' + recipe;
+            }
+            const outputCount = match[3] !== undefined ? parseInt(match[3]) : 1;
+            const recipeName = match[1];
+            return {
+                recipe: recipeName,
+                ingredientsMultiplier: 1,
+                productLimit: outputCount,
+                stockpileIngredientsForContinuousProduction: false,
+            };
+        } else if (typeof recipe === 'object') {
+            return recipe;
+        } else {
+            throw 'recipe must be a block or a string';
+        }
+    });
+
+    return buildOnDemandFactory(fullFactory, blockSequence, paddedSequence.length / 2, factoryLayout.supplyBeltMap);
+}
+
+export function buildOnDemandFactory(fullFactory: boolean,
     factorySequence: FactoryBlockSpec[],
     chunkSize: number,
     supplyBeltMap: SupplyBeltMap,
@@ -66,10 +95,11 @@ export function onDemandFactory(fullFactory: boolean,
                 return (ringSize + ringBlockIndex - sourceBlockIndex) % ringSize;
             });
 
-            const block = onDemandFactoryBlock(recipe, blockSpec,
-                supplyBeltMap,
-                { includeReverseBus: true, busLength: factorySequence.length, ingredientsDistances: nonBusIngredientsDistances },
-            );
+            const block = onDemandFactoryBlock(recipe, blockSpec, supplyBeltMap, {
+                includeReverseBus: true,
+                busLength: factorySequence.length,
+                ingredientsDistances: nonBusIngredientsDistances,
+            });
             const blockPos = rowEditor.cursor;
             rowEditor.addBlueprint(block);
             rowEditor.d(4);
@@ -97,7 +127,7 @@ export function onDemandFactory(fullFactory: boolean,
             rowFbp.rotate(2);
         }
         editor.addBlueprint(rowFbp);
-        editor.r(13);
+        editor.r(14);
 
         // Note: I do not interconnect rows yet.
         // TODO: interconnect rows

@@ -1,6 +1,6 @@
 ﻿import { FactorioRecipeName } from '../recipesExport';
 import { SupplyBeltMap } from '../supplySegment';
-import { block, reserve } from './factory';
+import { block, FactoryBlockSpec, FactoryLayout, reserve } from './factory';
 import _ from 'lodash';
 
 export const supplyBeltMap: SupplyBeltMap = {
@@ -14,13 +14,13 @@ export const supplyBeltMap: SupplyBeltMap = {
     // 'stone': 4, //
 };
 
-export const factorySequence: FactorioRecipeName[] = _.flatten([
+export const factorySequence: (FactorioRecipeName | FactoryBlockSpec)[] = _.flatten([
     // Note: first block can't have fluid supply because of the pipe arrangement
     'empty-barrel',
-    'plastic-bar',
-    'battery',
-    'battery',
-    'battery',
+    'plastic-bar@100',
+    'battery@50',
+    'battery@50',
+    'battery@50',
     'sulfur',
     'explosives',
     'explosives',
@@ -38,6 +38,16 @@ export const factorySequence: FactorioRecipeName[] = _.flatten([
     'laser-turret',
     'laser-turret',
     reserve,
+    reserve,
+    reserve,
+    reserve,
+    reserve,
+    reserve,
+    reserve,
+    reserve,
+    reserve,
+    reserve,
+    reserve,
 ]);
 
-export const factoryLayout = { supplyBeltMap, factorySequence };
+export const factoryLayout: FactoryLayout = { supplyBeltMap, factorySequence };

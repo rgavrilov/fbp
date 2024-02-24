@@ -8,11 +8,6 @@ import { WoodenChest } from './WoodenChest';
 import { StackMap } from './StackMap';
 
 
-const plan = `
-aaU.bbR.
-ccD.ddL.
-`;
-
 export type Plan = { elements: StackMap<string, { position: Position, direction: Direction }>, markers: Map<string, Position> };
 
 export function loadPlan(plan: string): Plan {

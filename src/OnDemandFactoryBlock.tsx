@@ -7,45 +7,47 @@ import { FastInserter, FilterInserter } from './inserters';
 import { AssemblingMachine } from './AssemblingMachine';
 import { Recipe } from './Recipe';
 import { WoodenChest } from './WoodenChest';
-import { Network } from './circuit';
+import { Network, Signal } from './circuit';
 import { ElectricPole } from './ElectricPole';
 import { ConstantCombinator } from './ConstantCombinator';
-import { Inverter } from './ArithmeticCombinator';
+import { ArithmeticCombinator, Inverter } from './ArithmeticCombinator';
 import { planToBlueprint } from './PlanBuilder';
-import { PositiveDetector, PositiveFilter } from './DeciderCombinator';
+import { DeciderCombinator, PositiveDetector, PositiveFilter } from './DeciderCombinator';
 import { ChemicalPlant } from './ChemicalPlant';
 import { ElectricFurnace } from './ElectricFurnace';
 import { buildSupplySegment, SupplyBeltMap } from './supplySegment';
 import { FactoryBlockSpec } from './factories/factory';
 
 /*
-yb - down, yellow, belt
-rb - down, red, belt
-ms# - raw material spot 1, 2, 3
 am - assembly table
-ii - ingredient inserter
-ic - ingredients chest
-ip - ingredients picker
+bb - bus-back, reverse loop on the main buss
+bp - belt pole - transactions: red - consumption from the ring belt, green - output to the ring belt
 bs - bus belt 1 (sensor)
 bt - bus belt 2 (throttle)
-pe - product extractor
+cc - ingredients constant combinator
+df - demand filter
+dp - demand pole - red - global demand
+ia - ingredients arithmetic
+ic - ingredients chest
+ii - ingredient inserter
+ip - ingredients picker
+mf - multiplier filter - passes through positive product count from the demand line
+mm - multiplier multiplier - multiplies product demand (from mf) by ingredient demand count 
+ms# - raw material spot 1, 2, 3
 pc - product chest
 pd - product dispenser
-bp - belt pole
-df - demand filter
-dp - demand pole
-ia - ingredients arithmetic
-cc - ingredients constant combinator
-ts - throttle sensor
-ti - throttle ingredients
+pe - product extractor
 pf - pick-up filter, decider that isolates ingr pick-up inserter from being controlled from the bus-trans network
-bb - bus-back, reverse loop on the main buss
+rb - down, red, belt
+ti - throttle ingredients
+ts - throttle sensor
+yb - down, yellow, belt
  */
 const planString: string = `
-ybD.ybD.ybD.rbD.m1#.amL.---.---.iiR.ic .ipR.bsD.tsD.---.---.
-ybD.ybD.ybD.rbD.m2#.---.---.---.iaR.---.cc .btD.---.---.---.
-ybD.ybD.ybD.rbD.m3#.---.---.---.peL.pc .pdL.ybD.tiU.---.---.
-ybD.ybD.ybD.rbD.   .bp .pfL.   .dfR.---.dp .ybD.---.---.---.
+ybD.ybD.ybD.rbD.m1#.amL.---.---.iiR.ic .ipR.bsD.tsD.mfD.   .   .
+ybD.ybD.ybD.rbD.m2#.---.---.---.iaR.---.cc .btD.---.---.   .   .
+ybD.ybD.ybD.rbD.m3#.---.---.---.peL.pc .pdL.ybD.tiU.mmD.   .   .
+ybD.ybD.ybD.rbD.   .bp .pfL.   .dfR.---.dp .ybD.---.---.   .   .
 `;
 
 
@@ -79,21 +81,26 @@ export function onDemandFactoryBlock(recipe: Recipe,
             }
             const nonBusIngredients = _.omit(recipe.ingredients, _.keys(supplyBeltMap).concat(fluids));
 
-            const yellowTransporterBeltSpeed = 1.875;
 
+            // get ingredient count, potentially accounting for the distance to the supplying block 
             function getIngredientCount(quantity: number, distance: number) {
-                return Math.ceil(quantity * (blockSpec.ingredientsMultiplier +
-                    (blockSpec.stockpileIngredientsForContinuousProduction ? distance / yellowTransporterBeltSpeed /
-                        recipe.craftingTime : 0)));
+                const yellowTransporterBeltSpeed = 1.875;
+                return Math.ceil(quantity * ((blockSpec.ingredientsMultiplier ?? 1) +
+                    ((blockSpec.stockpileIngredientsForContinuousProduction ?? false) ? distance /
+                        yellowTransporterBeltSpeed / recipe.craftingTime : 0)));
             }
 
+            const ingredientSignals = _.map(nonBusIngredients as { [key: string]: number },
+                (quantity: number, item: string) => ({
+                    signal: item, count: -1 * quantity,
+                }),
+            );
+            const productCount: { signal: Signal, count: number } = {
+                signal: recipe.item, count: 1,
+            };
+
             const ingredientsConstant = new ConstantCombinator({
-                signals: _.map(nonBusIngredients as { [key: string]: number }, (quantity: number, item: string) => ({
-                    signal: item,
-                    count: -1 * getIngredientCount(quantity,
-                        (options?.ingredientsDistances?.[item] ?? options?.busLength ?? 54) * 4,
-                    ),
-                })),
+                signals: [...ingredientSignals, productCount],
             });
             return ingredientsConstant;
         },
@@ -125,6 +132,14 @@ export function onDemandFactoryBlock(recipe: Recipe,
         ts: () => new PositiveDetector(),
         ti: () => new PositiveDetector(),
         bb: () => options?.includeReverseBus !== false ? new TransportBelt() : undefined,
+        mf: () => new DeciderCombinator({
+            condition: { firstOperand: recipe.item, operator: 'gt', secondOperand: 0 },
+            outputSignal: recipe.item,
+            copyCountFromInput: true,
+        }),
+        mm: () => new ArithmeticCombinator({
+            firstOperand: 'signal-each', operation: '*', secondOperand: recipe.item, outputSignal: 'signal-each',
+        }),
     }, [
         [Network.Electric, 'bp', 'dp'],
         [Network.Red, 'ip', 'pf:input'],
@@ -132,7 +147,12 @@ export function onDemandFactoryBlock(recipe: Recipe,
         [Network.Red, 'df:output', 'pd'],
         [Network.Green, 'ia:output', 'ip'],
         [Network.Red, 'dp', 'pd'],
-        [Network.Red, 'cc', { id: 'ia', circuit: 'input' }],
+
+        [Network.Red, 'cc', { id: 'mm', circuit: 'input' }],
+        [Network.Red, 'dp', { id: 'mf', circuit: 'input' }],
+        [Network.Red, { id: 'mf', circuit: 'output' }, { id: 'mm', circuit: 'input' }],
+        [Network.Red, { id: 'mm', circuit: 'output' }, { id: 'ia', circuit: 'input' }],
+
         [Network.Red, 'ic', { id: 'ia', circuit: 'input' }],
         [Network.Red, { id: 'ia', circuit: 'output' }, { id: 'df', circuit: 'input' }],
         [Network.Green, { id: 'ia', circuit: 'output' }, { id: 'ti', circuit: 'input' }],
