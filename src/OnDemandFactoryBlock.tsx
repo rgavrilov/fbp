@@ -85,22 +85,30 @@ export function onDemandFactoryBlock(recipe: Recipe,
             // get ingredient count, potentially accounting for the distance to the supplying block 
             function getIngredientCount(quantity: number, distance: number) {
                 const yellowTransporterBeltSpeed = 1.875;
-                return Math.ceil(quantity * ((blockSpec.ingredientsMultiplier ?? 1) +
-                    ((blockSpec.stockpileIngredientsForContinuousProduction ?? false) ? distance /
+                const blockSize = 4;
+                return Math.ceil(quantity * (1 +
+                    ((blockSpec.stockpileIngredientsForContinuousProduction ?? false) ? distance * blockSize /
                         yellowTransporterBeltSpeed / recipe.craftingTime : 0)));
             }
 
-            const ingredientSignals = _.map(nonBusIngredients as { [key: string]: number },
-                (quantity: number, item: string) => ({
-                    signal: item, count: -1 * quantity,
-                }),
+            const ingredientsCountSignals = _.map(nonBusIngredients as { [key: string]: number },
+                (quantity: number, item: string) => {
+                    quantity *= blockSpec.ingredientsMultiplier ?? 1;
+                    return ({
+                        signal: item,
+                        count: -1 *
+                            (blockSpec.stockpileIngredientsForContinuousProduction ? getIngredientCount(quantity,
+                                options?.ingredientsDistances?.[item] ?? 30,
+                            ) : quantity),
+                    });
+                },
             );
             const productCount: { signal: Signal, count: number } = {
                 signal: recipe.item, count: 1,
             };
 
             const ingredientsConstant = new ConstantCombinator({
-                signals: [...ingredientSignals, productCount],
+                signals: [...ingredientsCountSignals, productCount],
             });
             return ingredientsConstant;
         },
@@ -134,7 +142,8 @@ export function onDemandFactoryBlock(recipe: Recipe,
         bb: () => options?.includeReverseBus !== false ? new TransportBelt() : undefined,
         mf: () => new DeciderCombinator({
             condition: { firstOperand: recipe.item, operator: 'gt', secondOperand: 0 },
-            outputSignal: recipe.item,
+            // outputSignal: recipe.item,
+            outputSignal: 'signal-T',
             copyCountFromInput: true,
         }),
         mm: () => new ArithmeticCombinator({

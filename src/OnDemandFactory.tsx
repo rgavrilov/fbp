@@ -18,7 +18,11 @@ function interconnect(block1: Fbp, block2: Fbp, network: Network, point: string,
     factory.addConnection(network, block1.exports[point] as ConnectionPoint, block2.exports[point] as ConnectionPoint);
 }
 
-export function onDemandFactory(fullFactory: boolean, factoryLayout: FactoryLayout) {
+export function onDemandFactory(
+    fullFactory: boolean,
+    factoryLayout: FactoryLayout,
+    options?: { includeSignalDisplays?: boolean },
+) {
 
     const paddedSequence = [
         ...factoryLayout.factorySequence, ...(factoryLayout.factorySequence.length % 1 ? [reserve] : []),
@@ -45,13 +49,20 @@ export function onDemandFactory(fullFactory: boolean, factoryLayout: FactoryLayo
         }
     });
 
-    return buildOnDemandFactory(fullFactory, blockSequence, paddedSequence.length / 2, factoryLayout.supplyBeltMap);
+    return buildOnDemandFactory(
+        fullFactory,
+        blockSequence,
+        paddedSequence.length / 2,
+        factoryLayout.supplyBeltMap,
+        options ?? {},
+    );
 }
 
 export function buildOnDemandFactory(fullFactory: boolean,
     factorySequence: FactoryBlockSpec[],
     chunkSize: number,
     supplyBeltMap: SupplyBeltMap,
+    options: { includeSignalDisplays?: boolean },
 ) {
 
     const missingIngredients = getMissingRecipes(factorySequence,
@@ -68,7 +79,7 @@ export function buildOnDemandFactory(fullFactory: boolean,
     // control block
     let previousBlock: Fbp | undefined = undefined;
     const editor = new Editor(factory);
-    const controlBlock = fullFactory ? buildControlBlock() : undefined;
+    const controlBlock = fullFactory ? buildControlBlock(options.includeSignalDisplays ?? false) : undefined;
     if (controlBlock) {
         previousBlock = controlBlock;
         editor.addBlueprint(controlBlock);

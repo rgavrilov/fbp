@@ -8,11 +8,12 @@ export const reserve: FactorioRecipeName = 'wooden-chest';
 
 export const repeat = (recipe: FactorioRecipeName, times: number) => _.map(Array(times), () => (() => recipe)());
 
-export const block = (segments: Segment[],
+export const block = (
     recipe: FactorioRecipeName,
     options?: { repeat?: number, segment?: Segment },
+    segments?: Segment[]
 ) => {
-    if (options?.segment && !segments.includes(options.segment)) {
+    if (options?.segment && !segments?.includes(options.segment)) {
         return [reserve];
     }
 

@@ -5,7 +5,7 @@ import { IdentityCombinator, Inverter } from './ArithmeticCombinator';
 import { GuiSignalDisplay } from './GuiSignalDisplay';
 import { TransportBelt } from './transportBelts';
 
-export function buildControlBlock() {
+export function buildControlBlock(includeSignalDisplays: boolean) {
 
     const plan = `
    .   .   .   .   .   .   .   .iaD.   .aaU.   .   .   .   .   .
@@ -16,8 +16,8 @@ export function buildControlBlock() {
         dp: () => new ElectricPole(),
         ia: () => new Inverter(),
         aa: () => new IdentityCombinator(),
-        s1: () => new GuiSignalDisplay(),
-        s2: () => new GuiSignalDisplay(),
+        s1: () => includeSignalDisplays ? new GuiSignalDisplay() : undefined,
+        s2: () => includeSignalDisplays ? new GuiSignalDisplay() : undefined,
         yb: () => new TransportBelt(),
     }, [
         [Network.Green, 'tp', 'ia:input'],
@@ -26,9 +26,13 @@ export function buildControlBlock() {
         [Network.Red, 'tp', 'aa:input'],
         [Network.Green, 'aa:output', 'aa:input'],
         [Network.Red, 'aa:output', 'dp'],
-        [Network.Green, 'ia:output', 's1'],
-        [Network.Red, 'aa:output', 's2'],
-    ], {
+        includeSignalDisplays ? [Network.Green, 'ia:output', 's1'] : undefined,
+        includeSignalDisplays ? [Network.Red, 'aa:output', 's2'] : undefined,
+    ].filter(Boolean).map(i => i as [
+        Network, // network
+            string | { id: string, circuit: 'input' | 'output' }, // point1
+            string | { id: string, circuit: 'input' | 'output' }, // point2
+    ]), {
         busTransactions: 'tp', demand: 'dp',
     });
 }

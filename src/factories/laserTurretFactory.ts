@@ -6,6 +6,6 @@ export const laserTurretsFactory: FactorioRecipeName[] = [
     'sulfuric-acid',
     'copper-cable',
     'electronic-circuit',
-    ...block([], 'battery', { repeat: 3 }),
+    ...block( 'battery', { repeat: 3 }),
     'laser-turret',
 ];

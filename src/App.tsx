@@ -2,16 +2,13 @@ import './App.css';
 import { buildBlueprintExport, getBlueprintExchangeString } from './blueprintExport';
 import { onDemandFactory } from './OnDemandFactory';
 
-import { factoryLayout as militaryFactoryLayout } from './factories/militaryFactory';
+import { militaryFactoryLayout } from './factories/militaryFactory';
+import { yellowAndPurpleFactory } from './factories/yellowAndPurpleFactory';
 
 type DisabledWithMessage = { disabled: boolean | string | undefined };
 
 function App() {
-
-    // const factoryLayout = phase1FactoryLayout;
-    const factoryLayout = militaryFactoryLayout;
-
-    const factory = onDemandFactory(true, factoryLayout);
+    const factory = onDemandFactory(true, yellowAndPurpleFactory);
 
     return (<div className="App" style={ {
         'minWidth': '100%', 'width': '800px',

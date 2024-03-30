@@ -1,6 +1,6 @@
 ﻿import { FactorioRecipeName } from '../recipesExport';
 import { SupplyBeltMap } from '../supplySegment';
-import { block, FactoryBlockSpec, FactoryLayout, reserve } from './factory';
+import { FactoryBlockSpec, FactoryLayout, reserve } from './factory';
 import _ from 'lodash';
 
 export const supplyBeltMap: SupplyBeltMap = {
@@ -50,4 +50,4 @@ export const factorySequence: (FactorioRecipeName | FactoryBlockSpec)[] = _.flat
     reserve,
 ]);
 
-export const factoryLayout: FactoryLayout = { supplyBeltMap, factorySequence };
+export const militaryFactoryLayout: FactoryLayout = { supplyBeltMap, factorySequence };

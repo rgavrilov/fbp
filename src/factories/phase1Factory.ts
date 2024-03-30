@@ -14,10 +14,6 @@ export const supplyBeltMap: SupplyBeltMap = {
     'stone': 4, //
 };
 
-const segments: Segment[] = ['blue-belts'];
-
-const b = _.partial(block, segments);
-
 export const factorySequence: (FactorioRecipeName | FactoryBlockSpec)[] = _.flatten([
     // first block can't have fluid supply because of the pipe arrangement
     'transport-belt@100',
