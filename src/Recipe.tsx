@@ -2,7 +2,8 @@
 import { FactorioManufacturingTypes, FactorioRecipe, factorioRecipes } from './recipesExport';
 import _ from 'lodash';
 
-type ManufacturingEquipment = 'assembling-machine' | 'oil-refinery' | 'chemical-plant' | 'furnace';
+// Hack: to support a rated factory we use 'collector' as a manufacturing equipment, but it is not really.
+type ManufacturingEquipment = 'assembling-machine' | 'oil-refinery' | 'chemical-plant' | 'furnace' | 'collector';
 
 export class Recipe {
     constructor(public item: Item,
@@ -13,21 +14,10 @@ export class Recipe {
     ) {}
 }
 
-// export const recipes = {
-//     copperCable: new Recipe('copper-cable', { 'copper-plate': 1 }, 0.5, 2),
-//     electronicCircuit: new Recipe('electronic-circuit', { 'copper-cable': 3, 'iron-plate': 1 }, 0.5),
-//     advancedCircuit: new Recipe('advanced-circuit',
-//         { 'copper-cable': 4, 'electronic-circuit': 2, 'plastic-bar': 2 },
-//         6,
-//     ),
-//     plasticBar: new Recipe('plastic-bar', {
-//         'petroleum-gas': 20, coal: 1,
-//     }, 1, 2, 'chemical-plant'),
-//     ironGearWheel: new Recipe('iron-gear-wheel', { 'iron-plate': 2 }, undefined, 1),
-//     ironStick: new Recipe('iron-stick', { 'iron-plate': 1 }, undefined, 2),
-// } as const;
-
-const toIngredients: (ingredients: { amount: number, name: Item | Fluid }[]) => Partial<Record<Item | Fluid, number>> = (ingredients) => {
+const toIngredients: (ingredients: {
+    amount: number,
+    name: Item | Fluid
+}[]) => Partial<Record<Item | Fluid, number>> = (ingredients) => {
     return _.chain(ingredients)
         .keyBy('name')
         .mapValues('amount')
@@ -42,15 +32,11 @@ const categoryToEquipmentMap: Partial<Record<FactorioManufacturingTypes, Manufac
     'smelting': 'furnace',
 } as const;
 
-export const recipes = _.mapValues(
-    factorioRecipes,
-    (recipe: FactorioRecipe, key) => {
-        return new Recipe(
-            key as Item,
-            toIngredients(recipe.ingredients as any as ({ amount: number, name: Item | Fluid }[])),
-            recipe.energy_required,
-            recipe.results[0].amount,
-            categoryToEquipmentMap[recipe.category as FactorioManufacturingTypes],
-        );
-    },
-);
+export const recipes: Partial<Record<Item, Recipe>> = _.mapValues(factorioRecipes, (recipe: FactorioRecipe, key) => {
+    return new Recipe(key as Item,
+        toIngredients(recipe.ingredients as any as ({ amount: number, name: Item | Fluid }[])),
+        recipe.energy_required,
+        recipe.results[0].amount,
+        categoryToEquipmentMap[recipe.category as FactorioManufacturingTypes],
+    );
+});

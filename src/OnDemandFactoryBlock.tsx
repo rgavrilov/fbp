@@ -12,7 +12,7 @@ import { ElectricPole } from './ElectricPole';
 import { ConstantCombinator } from './ConstantCombinator';
 import { ArithmeticCombinator, Inverter } from './ArithmeticCombinator';
 import { planToBlueprint } from './PlanBuilder';
-import { DeciderCombinator, PositiveDetector, PositiveFilter } from './DeciderCombinator';
+import { DeciderCombinator, HeavisideGate, PositiveFilter } from './DeciderCombinator';
 import { ChemicalPlant } from './ChemicalPlant';
 import { ElectricFurnace } from './ElectricFurnace';
 import { buildSupplySegment, SupplyBeltMap } from './supplySegment';
@@ -134,11 +134,11 @@ export function onDemandFactoryBlock(recipe: Recipe,
         bs: () => new TransportBelt({ readContent: 'hold' }),
         bt: () => new TransportBelt({
             enableCondition: {
-                firstOperand: 'signal-everything', operator: 'ne', secondOperand: 2,
+                firstOperand: 'signal-anything', operator: 'ne', secondOperand: 2,
             },
         }),
-        ts: () => new PositiveDetector(),
-        ti: () => new PositiveDetector(),
+        ts: () => new HeavisideGate(),
+        ti: () => new HeavisideGate(),
         bb: () => options?.includeReverseBus !== false ? new TransportBelt() : undefined,
         mf: () => new DeciderCombinator({
             condition: { firstOperand: recipe.item, operator: 'gt', secondOperand: 0 },

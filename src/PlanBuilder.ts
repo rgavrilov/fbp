@@ -4,11 +4,12 @@ import { Network } from './circuit';
 import { Direction } from './Direction';
 import { ConnectionPoint } from './ConnectionPoint';
 import { Position } from './Position';
-import { WoodenChest } from './WoodenChest';
 import { StackMap } from './StackMap';
 
 
-export type Plan = { elements: StackMap<string, { position: Position, direction: Direction }>, markers: Map<string, Position> };
+export type Plan = {
+    elements: StackMap<string, { position: Position, direction: Direction }>, markers: Map<string, Position>
+};
 
 export function loadPlan(plan: string): Plan {
     const lines = plan.split('\n').map(line => line.trim()).filter(line => !!line);
@@ -23,6 +24,7 @@ export function loadPlan(plan: string): Plan {
             const field = fields[fieldKey];
             if (!field.match(/^[ \-]*$/)) {
 
+                // I don't remember what marker is or how it is used.
                 const isMarker = field[2] === '#';
                 if (isMarker) {
                     markers.set(field.substring(0, 2), new Position(x, y));
@@ -34,11 +36,9 @@ export function loadPlan(plan: string): Plan {
                         'R': Direction.Right,
                         ' ': Direction.Down,
                     };
+                    // if no direction is specified, then treat this as a 3-characters id.
                     const direction = directionMap[field[2]];
-                    if (direction === undefined) {
-                        throw new Error(`\`${ field[2] }\` is not a recognized direction symbol.`);
-                    }
-                    const elementId = field.substring(0, 2);
+                    const elementId = direction === undefined ? field.substring(0, 3) : field.substring(0, 2);
                     elements.add(elementId, { position: new Position(x, y), direction: direction });
                 }
             }
@@ -47,8 +47,10 @@ export function loadPlan(plan: string): Plan {
     return { elements, markers };
 }
 
+export type EntityBuilders = Record<string, () => Entity | undefined>;
+
 export function planToBlueprint(planString: string, //
-    entitiesBuilders: Record<string, () => Entity | undefined>, //
+    entitiesBuilders: EntityBuilders, //
     connections: [
         Network, // network
             string | { id: string, circuit: 'input' | 'output' }, // point1
@@ -58,9 +60,11 @@ export function planToBlueprint(planString: string, //
 
     function buildConnection(elements: StackMap<string, { entity: Entity }>,
         connection: string | { id: string; circuit: 'input' | 'output' },
-    ): ConnectionPoint | Entity {
+    ): ConnectionPoint | Entity | undefined {
 
-        function buildCanonicalConnection(connection: string | { id: string; circuit: 'input' | 'output' }): { id: string; circuit: 'input' | 'output' } {
+        function buildCanonicalConnection(connection: string | { id: string; circuit: 'input' | 'output' }): {
+            id: string; circuit: 'input' | 'output'
+        } {
             if (typeof connection === 'object') {
                 return connection;
             } else {
@@ -73,7 +77,11 @@ export function planToBlueprint(planString: string, //
         }
 
         const canonicalConnection: { id: string; circuit: 'input' | 'output' } = buildCanonicalConnection(connection);
-        const entity = elements.get(canonicalConnection.id).entity;
+        if (!elements.has(canonicalConnection.id)) {
+            return undefined;
+        }
+        const element = elements.get(canonicalConnection.id);
+        const entity = element.entity;
         let point: ConnectionPoint | undefined = undefined;
         if (canonicalConnection.circuit) {
             point = (entity as any)[canonicalConnection.circuit];
@@ -93,7 +101,6 @@ export function planToBlueprint(planString: string, //
     const planElements = new StackMap<string, { entity: Entity; position: Position; direction: Direction }>();
     for (let [id, element] of plan.elements) {
         if (entitiesBuilders[id] === undefined) {
-            // FDO: throw new Error(`No entity builder provided for element with id: ${ id }.`);
             console.warn(`No entity builder provided for element with id: ${ id }.`);
         }
 
@@ -106,10 +113,11 @@ export function planToBlueprint(planString: string, //
 
     for (let connection of connections) {
         const network = connection[0];
-        fbp.addConnection(network,
-            buildConnection(planElements, connection[1]),
-            buildConnection(planElements, connection[2]),
-        );
+        const point1 = buildConnection(planElements, connection[1]);
+        const point2 = buildConnection(planElements, connection[2]);
+        if (point1 && point2) {
+            fbp.addConnection(network, point1, point2);
+        }
     }
 
     for (let expName in exports) {

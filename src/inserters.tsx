@@ -102,8 +102,11 @@ class FilterInserterBase extends InserterBase {
     getBlueprintOutputAttributes() {
         return {
             ...super.getBlueprintOutputAttributes(),
-            filters: _.map(this.filters, (item, index) => ({ index: index + 1, name: item })),
-            filter_mode: this.filterMode,
+            filters: _.map(
+                this.filters,
+                (item, index) => ({ index: index + 1, name: item }),
+            ), // fbe website doesn't support "whitelist" option, it is a default option.
+            filter_mode: this.filterMode === 'whitelist' ? undefined : 'blacklist',
         };
     }
 }

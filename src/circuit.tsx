@@ -9,7 +9,7 @@ export enum Network {
 
 export type SignalType = 'item' | 'virtual' | 'fluid';
 
-export const virtualSignals = ['signal-each', 'signal-everything', 'signal-T'];
+export const virtualSignals = ['signal-each', 'signal-everything', 'signal-anything', 'signal-T'];
 
 export type VirtualSignal = typeof virtualSignals[number];
 

@@ -63,7 +63,7 @@ export function buildOnDemandFactory(fullFactory: boolean,
     chunkSize: number,
     supplyBeltMap: SupplyBeltMap,
     options: { includeSignalDisplays?: boolean },
-) {
+): Fbp {
 
     const missingIngredients = getMissingRecipes(factorySequence,
         Object.keys(supplyBeltMap).concat(fluids).concat([]),

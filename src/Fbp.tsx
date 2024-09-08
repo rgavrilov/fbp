@@ -20,8 +20,10 @@ export type Connection = {
     point1: ConnectionPoint, point2: ConnectionPoint, network: Network
 };
 
+export type FbpExports = { [name: string]: Entity | ConnectionPoint | PipeConnection };
+
 export class Fbp {
-    exports: { [name: string]: Entity | ConnectionPoint | PipeConnection } = {};
+    exports: FbpExports = {};
     elements: Element[] = [];
     connections: Connection[] = [];
 

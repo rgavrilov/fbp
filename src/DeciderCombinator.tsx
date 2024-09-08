@@ -48,7 +48,7 @@ export class PositiveFilter extends DeciderCombinator {
 /**
  * Outputs 1 for each channel that has positive number.
  */
-export class PositiveDetector extends DeciderCombinator {
+export class HeavisideGate extends DeciderCombinator {
     constructor() {
         super({
             condition: {

@@ -63,6 +63,10 @@ export class StackMap<K, V> implements Iterable<[K, V]> {
         return this.map.get(key)![0];
     }
 
+    has(key: K): boolean {
+        return this.map.has(key);
+    }
+
     add(key: K, value: V) {
         if (this.map.has(key)) {
             this.map.get(key)!.push(value);
